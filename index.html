@@ -179,7 +179,6 @@
   <div class="home-cover__inner">
     <h1>worny</h1>
     <p>welcome to my blog</p>
-    <span>--跟上我，我带你走</span>
   </div>
   <a class="home-cover__scroll" href="#home-main" aria-label="Scroll to homepage"></a>
 </section>
@@ -187,18 +186,18 @@
 <main id="home-main" class="home-main">
   
   
-    <article id="post-RCE" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
+    <article id="post-php反序列化" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2026/07/02/RCE/" class="article-date">
+      <a href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="article-date">
       <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
 </a>
     </div>
   
   <div class="article-inner">
     
-      <a class="home-post-visual" href="/2026/07/02/RCE/" aria-label="RCE">
-        <span>R</span>
+      <a class="home-post-visual" href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" aria-label="php反序列化">
+        <span>P</span>
       </a>
     
     
@@ -209,7 +208,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2026/07/02/RCE/">RCE</a>
+      <a class="article-title" href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化</a>
     </h1>
   
 
@@ -235,12 +234,12 @@
 
       
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RCE/" rel="tag">RCE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag">Web安全</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag">Web安全</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">php反序列化</a></li></ul>
     </div>
 
       
         <p class="article-more-link">
-          <a  href="/2026/07/02/RCE/#more">阅读全文 >></a>
+          <a  href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/#more">阅读全文 >></a>
         </p>
       
       <div class="clearfix"></div>
@@ -333,6 +332,79 @@
 
 
   
+    <article id="post-RCE" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2026/07/02/RCE/" class="article-date">
+      <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <a class="home-post-visual" href="/2026/07/02/RCE/" aria-label="RCE">
+        <span>R</span>
+      </a>
+    
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2026/07/02/RCE/">RCE</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+              <p> 安全声明：本文仅用于 CTF 学习与授权环境复现。 RCE命令执行（执行系统命令） 函数 作用 是否直接把命令输出打印到页面？ 返回值是什么？ system() 执行系统命令 ✅ 会把命令执行过程的输出打印出来 返回命令输出的最后一行（字符串） passthru() 执行命令并“原样”输出（适合二进制流） ✅ 直接输出所有原始内容 一般返回 null ex...</p>
+          
+      
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RCE/" rel="tag">RCE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag">Web安全</a></li></ul>
+    </div>
+
+      
+        <p class="article-more-link">
+          <a  href="/2026/07/02/RCE/#more">阅读全文 >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-文件包含" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -406,79 +478,6 @@
 
 
   
-    <article id="post-php反序列化" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="article-date">
-      <time datetime="2026-07-02T14:00:00.000Z" itemprop="datePublished">2026-07-02</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <a class="home-post-visual" href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" aria-label="php反序列化">
-        <span>P</span>
-      </a>
-    
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <p> 安全声明：本文仅用于 CTF 学习与授权环境复现。可直接运行的 PHP shell 示例已替换为 &amp;lt;PHP_WEB_SHELL_PAYLOAD_OMITTED_FOR_SAFETY&amp;gt;。对应十六进制 PHP payload 已替换为 &amp;lt;HEX_ENCODED_PHP_PAYLOAD_OMITTED_FOR_SAFETY&amp;gt;。文中的危险脚...</p>
-          
-      
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-    <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/CTF/">CTF</a>
-    </div>
-
-
-      
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web%E5%AE%89%E5%85%A8/" rel="tag">Web安全</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag">php反序列化</a></li></ul>
-    </div>
-
-      
-        <p class="article-more-link">
-          <a  href="/2026/07/02/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/#more">阅读全文 >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-
-  
     <article id="post-SQL注入" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -533,71 +532,6 @@
       
         <p class="article-more-link">
           <a  href="/2026/07/02/SQL%E6%B3%A8%E5%85%A5/#more">阅读全文 >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-MyFirstBlog" class="article article-type-post home-post-card" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2026/04/12/MyFirstBlog/" class="article-date">
-      <time datetime="2026-04-12T12:17:26.000Z" itemprop="datePublished">2026-04-12</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <a class="home-post-visual" href="/2026/04/12/MyFirstBlog/" aria-label="MyFirstBlog">
-        <span>M</span>
-      </a>
-    
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2026/04/12/MyFirstBlog/">MyFirstBlog</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-          
-              <p>1 ...</p>
-          
-      
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-
-      
-      
-        <p class="article-more-link">
-          <a  href="/2026/04/12/MyFirstBlog/#more">阅读全文 >></a>
         </p>
       
       <div class="clearfix"></div>

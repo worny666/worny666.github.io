@@ -5103,6 +5103,14 @@ body {
 .article-title {
   color: #000;
 }
+.article-author {
+  margin-top: 42px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0,0,0,0.12);
+  color: #555;
+  font-size: 14px;
+  text-align: right;
+}
 .home-landing-page .body-wrap {
   margin-bottom: 0;
 }
@@ -5121,11 +5129,11 @@ body {
   display: -ms-flexbox;
   display: box;
   display: flex;
-  -webkit-box-align: center;
-  -moz-box-align: center;
-  -ms-flex-align: center;
-  -webkit-align-items: center;
-  align-items: center;
+  -webkit-box-align: start;
+  -moz-box-align: start;
+  -ms-flex-align: start;
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
   -webkit-box-pack: center;
   -moz-box-pack: center;
   -ms-flex-pack: center;
@@ -5165,7 +5173,7 @@ body {
   position: relative;
   z-index: 1;
   width: 100%;
-  padding: 0 48px;
+  padding: 13vh 48px 0;
   text-align: left;
   -webkit-animation: homeCoverIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
   -moz-animation: homeCoverIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -5189,15 +5197,6 @@ body {
   font-size: clamp(18px, 3vw, 34px);
   letter-spacing: 0.18em;
   text-transform: lowercase;
-}
-.home-cover__inner span {
-  display: inline-block;
-  margin-top: 28px;
-  padding-left: 4px;
-  color: rgba(255,245,214,0.92);
-  font-size: clamp(18px, 2.1vw, 28px);
-  letter-spacing: 0.08em;
-  text-shadow: 0 8px 24px rgba(0,0,0,0.34);
 }
 .home-cover__scroll {
   position: absolute;
@@ -5354,7 +5353,7 @@ body {
     min-height: 92vh;
   }
   .home-cover__inner {
-    padding: 0 24px;
+    padding: 12vh 24px 0;
   }
   .home-cover__inner p {
     letter-spacing: 0.12em;
