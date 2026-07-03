@@ -5239,11 +5239,8 @@ body {
   margin-bottom: 26px;
 }
 .home-post-card .article-inner {
-  display: grid;
-  grid-template-columns: 152px minmax(0, 1fr);
-  gap: 0 24px;
-  min-height: 178px;
-  padding: 18px 22px 18px 18px;
+  min-height: 156px;
+  padding: 24px 28px 22px;
   border: 1px solid rgba(13,64,83,0.12);
   border-radius: 24px;
   background: rgba(255,255,255,0.86);
@@ -5262,38 +5259,6 @@ body {
   transform: translateY(-3px);
   -webkit-box-shadow: 0 22px 58px rgba(7,20,31,0.24);
   box-shadow: 0 22px 58px rgba(7,20,31,0.24);
-}
-.home-post-visual {
-  grid-row: 1/4;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: box;
-  display: flex;
-  -webkit-box-align: center;
-  -moz-box-align: center;
-  -ms-flex-align: center;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -moz-box-pack: center;
-  -ms-flex-pack: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  min-height: 142px;
-  border-radius: 19px;
-  background: -webkit-radial-gradient(circle at 28% 24%, rgba(255,255,255,0.35), transparent 28%), -webkit-linear-gradient(305deg, #0f6b80, #0d2033 56%, #49b879);
-  background: -moz-radial-gradient(circle at 28% 24%, rgba(255,255,255,0.35), transparent 28%), -moz-linear-gradient(305deg, #0f6b80, #0d2033 56%, #49b879);
-  background: -ms-radial-gradient(circle at 28% 24%, rgba(255,255,255,0.35), transparent 28%), -ms-linear-gradient(305deg, #0f6b80, #0d2033 56%, #49b879);
-  background: radial-gradient(circle at 28% 24%, rgba(255,255,255,0.35), transparent 28%), linear-gradient(145deg, #0f6b80, #0d2033 56%, #49b879);
-  color: #fff;
-  overflow: hidden;
-}
-.home-post-visual span {
-  font-size: 54px;
-  font-weight: 800;
-  text-shadow: 0 12px 28px rgba(0,0,0,0.28);
 }
 .home-post-card .article-header {
   padding: 4px 120px 6px 0;
@@ -5329,6 +5294,10 @@ body {
 .home-post-card .article-meta time {
   color: #6c7c88;
 }
+.home-post-card .article-reading-meta {
+  margin-left: 10px;
+  color: #8a98a3;
+}
 .home-post-card .article-info-index.article-info {
   margin: 10px 0 0;
   border: none;
@@ -5359,12 +5328,7 @@ body {
     letter-spacing: 0.12em;
   }
   .home-post-card .article-inner {
-    display: block;
-    padding: 16px;
-  }
-  .home-post-visual {
-    min-height: 128px;
-    margin-bottom: 16px;
+    padding: 18px 16px;
   }
   .home-post-card .article-header {
     padding-right: 0;
